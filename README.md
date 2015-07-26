@@ -11,5 +11,5 @@ Build
 -----
 
 _Command Line_  
-Run 'qmake' followed by 'make'. You can build faster by using 'make -jn' where
-'n' is the number of CPU threads.
+Run `qmake` followed by `make`. You can build faster by using `make -jn` where
+`n` is the number of CPU threads.
