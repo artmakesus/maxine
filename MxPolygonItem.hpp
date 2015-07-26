@@ -4,6 +4,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsPolygonItem>
 
+class QOpenGLWidget;
 class QOpenGLTexture;
 
 class MxPolygonItem : public QObject, public QGraphicsPolygonItem {
@@ -15,6 +16,7 @@ public:
 	              const QPolygonF &vertices,
 				  const QPolygonF &texCoords,
 				  QGraphicsItem *parent = 0);
+	~MxPolygonItem();
 
 	virtual void paint(QPainter *painter,
 	                   const QStyleOptionGraphicsItem *option,
@@ -44,8 +46,11 @@ private:
 	void addPoint(float x, float y);
 	QPointF texCoordBetween(int a, int b);
 
+	QOpenGLWidget * openGLWidget();
+	void loadTexture(const char *filepath);
+	void deleteTexture();
+
 	QString mMediaFilePath;
-	QImage mImage;
 	QOpenGLTexture *mTexture;
 	QPolygonF mVertices;
 	QPolygonF mTexCoords;

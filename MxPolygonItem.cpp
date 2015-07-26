@@ -3,7 +3,9 @@
 #include <MxScene.hpp>
 
 #include <QPainter>
+#include <QOpenGLWidget>
 #include <QOpenGLTexture>
+#include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QGraphicsSceneDragDropEvent>
 #include <QMimeData>
@@ -51,7 +53,7 @@ MxPolygonItem::MxPolygonItem(const char *texture,
 
 	if (texture) {
 		mMediaFilePath = texture;
-		mImage.load(texture);
+		loadTexture(texture);
 	}
 
 	// initial position
@@ -65,6 +67,10 @@ MxPolygonItem::MxPolygonItem(const char *texture,
 	mTexCoords = texCoords;
 }
 
+MxPolygonItem::~MxPolygonItem() {
+	deleteTexture();
+}
+
 void MxPolygonItem::init() {
 	setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
 	setAcceptDrops(true);
@@ -74,10 +80,10 @@ void MxPolygonItem::paint(QPainter *painter,
                            const QStyleOptionGraphicsItem *option,
                            QWidget *widget)
 {
-	if (mImage.isNull()) {
-		drawDefault(painter);
-	} else {
+	if (mTexture) {
 		drawOpenGL(painter);
+	} else {
+		drawDefault(painter);
 	}
 
 	auto s = static_cast<MxScene*>(scene());
@@ -104,16 +110,9 @@ void MxPolygonItem::dropEvent(QGraphicsSceneDragDropEvent *evt) {
 		foreach (QUrl url, evt->mimeData()->urls()) {
 			mMediaFilePath = url.path().toUtf8();
 			auto s = url.path().toUtf8().data();
-			mImage.load(s);
-			delete mTexture;
+			loadTexture(s);
 			break;
 		}
-	} else if (mimeData->hasImage()) {
-		mImage = qvariant_cast<QImage>(mimeData->imageData());
-	}
-
-	if (!mImage.isNull()) {
-		emit invalidate();
 	}
 }
 
@@ -177,12 +176,6 @@ void MxPolygonItem::drawOpenGL(QPainter *painter) {
 	painter->beginNativePainting();
 
 	glEnable(GL_MULTISAMPLE);
-
-	if (!mTexture) {
-		mTexture = new QOpenGLTexture(mImage.mirrored());
-		mTexture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
-		mTexture->setMagnificationFilter(QOpenGLTexture::Linear);
-	}
 
 	mTexture->bind();
 
@@ -258,4 +251,42 @@ QPointF MxPolygonItem::texCoordBetween(int a, int b) {
 	auto tb = mTexCoords[b];
 	auto tc = ta + ((tb - ta) / 2);
 	return tc;
+}
+
+QOpenGLWidget *MxPolygonItem::openGLWidget() {
+	auto views = scene()->views();
+	if (views.size() == 0) {
+		return nullptr;
+	}
+	return static_cast<QOpenGLWidget*>(views[0]->viewport());
+}
+
+void MxPolygonItem::loadTexture(const char *filepath) {
+	auto glWidget = openGLWidget();
+
+	glWidget->makeCurrent();
+
+	if (mTexture) {
+		delete mTexture;
+	}
+
+	QImage image(filepath);
+	mTexture = new QOpenGLTexture(image.mirrored());
+	mTexture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
+	mTexture->setMagnificationFilter(QOpenGLTexture::Linear);
+
+	glWidget->doneCurrent();
+
+	emit invalidate();
+}
+
+void MxPolygonItem::deleteTexture() {
+	if (mTexture) {
+		return;
+	}
+
+	auto glWidget = openGLWidget();
+	glWidget->makeCurrent();
+	delete mTexture;
+	glWidget->doneCurrent();
 }
