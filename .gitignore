@@ -1,0 +1,17 @@
+maxine
+moc_*
+*.o
+Makefile
+
+*.jpg
+*.png
+*.gif
+
+*.mp3
+*.wav
+*.flac
+*.ogg
+*.aac
+
+*~
+*.swp
