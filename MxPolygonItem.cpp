@@ -309,8 +309,20 @@ void MxPolygonItem::removePoint(float x, float y) {
 QPointF MxPolygonItem::texCoordBetween(int a, int b) {
 	auto ta = mTexCoords[a];
 	auto tb = mTexCoords[b];
-	auto tc = ta + ((tb - ta) / 2);
-	return tc;
+
+	if (mTexCoords.size() > 5) {
+		auto tc = ta + ((tb - ta) / 2);
+		return tc;
+	}
+
+	if (ta.x() == 0 && ta.y() == 1) {
+		return QPointF(1, 1);
+	} else if (ta.x() == 1 && ta.y() == 1) {
+		return QPointF(1, 0);
+	} else if (ta.x() == 1 && ta.y() == 0) {
+		return QPointF(0, 0);
+	}
+	return QPointF(0, 1);
 }
 
 QOpenGLWidget *MxPolygonItem::openGLWidget() {
