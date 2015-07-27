@@ -291,7 +291,6 @@ void MxPolygonItem::removePoint(float x, float y) {
 		i = FIRST;
 	}
 
-	QPointF p(x, y);
 	mVertices.remove(i);
 	if (i == FIRST) {
 		mVertices[mVertices.size() - 1] = mVertices[FIRST];
