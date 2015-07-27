@@ -6,7 +6,7 @@ Overview
 
 Name | Optional | Size | Purpose
 -----|----------|------|--------
-Maxine magic keyword ("maxine") | No | 6 bytes | To identify the file as a .mxn file
+Maxine magic keyword ("maxine") | No | 7 bytes | To identify the file as a .mxn file
 Viewport resolution | No | 8 bytes | To know the resolution of the viewport in which the shapes will be displayed
 Shape count | No | 4 bytes | To know the number of projection shapes in advance
 Shapes | No | Shape size * shape count | To know the shape data such as vertices, texture coordinates, etc..
