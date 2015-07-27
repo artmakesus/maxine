@@ -43,7 +43,9 @@ private:
 	void drawDefault(QPainter *painter);
 	void drawOpenGL(QPainter *painter);
 	void drawMarkers(QPainter *painter);
+
 	void addPoint(float x, float y);
+	void removePoint(float x, float y);
 	QPointF texCoordBetween(int a, int b);
 
 	QOpenGLWidget * openGLWidget();

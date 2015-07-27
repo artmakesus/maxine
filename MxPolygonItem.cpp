@@ -159,7 +159,19 @@ void MxPolygonItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *evt) {
 	QGraphicsPolygonItem::mouseDoubleClickEvent(evt);
 
 	auto mousePos = evt->pos();
-	addPoint(mousePos.x(), mousePos.y());
+
+	switch (evt->button()) {
+	case Qt::LeftButton:
+		addPoint(mousePos.x(), mousePos.y());
+		break;
+	case Qt::RightButton:
+		if (mVertices.size() > 3) {
+			removePoint(mousePos.x(), mousePos.y());
+		}
+		break;
+	default:
+		break;
+	}
 }
 
 void MxPolygonItem::drawDefault(QPainter *painter) {
@@ -218,36 +230,79 @@ void MxPolygonItem::addPoint(float x, float y) {
 			j = FIRST;
 		}
 
-		auto avgDistance = MxPoint::distance(QPointF(x, y), QLineF(mVertices[i], mVertices[j]));
+		QPointF point(x, y);
+		QLineF line(mVertices[i], mVertices[j]);
+
+		auto avgDistance = MxPoint::distance(point, line);
 		if (avgDistance < shortestDistance) {
 			shortestDistance = avgDistance;
 			shortest = i;
 		}
 	}
 
-	if (shortest >= 0 && shortestDistance < 9999) {
-		// add vertex
-		auto i = (shortest + 1) % mVertices.size();
+	if (shortest < 0 && shortestDistance >= 9999) {
+		return;
+	}
 
-		// skip center point
-		if (i == CENTER) {
-			i = FIRST;
+	auto i = (shortest + 1) % mVertices.size();
+
+	// skip center point
+	if (i == CENTER) {
+		i = FIRST;
+	}
+
+	QPointF p(x, y);
+	mVertices.insert(i, p);
+	if (i == FIRST) {
+		mVertices[mVertices.size() - 1] = p;
+	}
+
+	setPolygon(mVertices);
+
+	// add texture coordinate
+	auto tc = texCoordBetween(shortest, shortest + 1);
+	mTexCoords.insert(i, tc);
+	if (i == FIRST) {
+		mTexCoords[mTexCoords.size() - 1] = tc;
+	}
+}
+
+void MxPolygonItem::removePoint(float x, float y) {
+	float shortestDistance = 9999;
+	int shortest = -1;
+
+	for (auto i = 1; i <= mVertices.size(); i++) {
+		auto avgDistance = MxPoint::distance(QPointF(x, y), mVertices[i]);
+		if (avgDistance < shortestDistance) {
+			shortestDistance = avgDistance;
+			shortest = i;
 		}
+	}
 
-		QPointF p(x, y);
-		mVertices.insert(i, p);
-		if (i == FIRST) {
-			mVertices[mVertices.size() - 1] = p;
-		}
+	if (shortest < 0 && shortestDistance >= 9999) {
+		return;
+	}
 
-		setPolygon(mVertices);
+	// add vertex
+	auto i = shortest;
 
-		// add texture coordinate
-		auto tc = texCoordBetween(shortest, shortest + 1);
-		mTexCoords.insert(i, tc);
-		if (i == FIRST) {
-			mTexCoords[mTexCoords.size() - 1] = tc;
-		}
+	// skip center point
+	if (i == CENTER) {
+		i = FIRST;
+	}
+
+	QPointF p(x, y);
+	mVertices.remove(i);
+	if (i == FIRST) {
+		mVertices[mVertices.size() - 1] = mVertices[FIRST];
+	}
+
+	setPolygon(mVertices);
+
+	// add texture coordinate
+	mTexCoords.remove(i);
+	if (i == FIRST) {
+		mTexCoords[mTexCoords.size() - 1] = mTexCoords[FIRST];
 	}
 }
 
