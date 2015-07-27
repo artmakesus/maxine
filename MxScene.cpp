@@ -2,7 +2,7 @@
 #include <MxPolygonItem.hpp>
 
 #include <QGraphicsSceneMouseEvent>
-#include <QTextStream>
+#include <QDataStream>
 #include <QBrush>
 #include <QFile>
 
@@ -24,12 +24,18 @@ void MxScene::save(const QString &filename) {
 	}
 
 	// save file format keyword
-	QTextStream out(&file);
-	out << "maxine ";
+	QDataStream out(&file);
+	out.setFloatingPointPrecision(QDataStream::SinglePrecision);
+
+	out << QString("maxine");
+
+	// save scene resolution
+	auto rect = sceneRect();
+	out << rect.x() << rect.y() << rect.width() << rect.height();
 
 	// save shapes count
 	auto shapes = items();
-	out << (int) shapes.size() << " ";
+	out << (qint32) shapes.size();
 
 	// save shapes
 	foreach (auto s, shapes) {
@@ -40,7 +46,6 @@ void MxScene::save(const QString &filename) {
 }
 
 void MxScene::load(const QString &filename) {
-	// remove shapes in current scene
 	clear();
 
 	QFile file(filename);
@@ -48,22 +53,29 @@ void MxScene::load(const QString &filename) {
 		return;
 	}
 
-	QString keyword;
-	QTextStream in(&file);
+	QDataStream in(&file);
+	in.setFloatingPointPrecision(QDataStream::SinglePrecision);
 
 	// load file format keyword
+	QString keyword;
 	in >> keyword;
+
 	if (keyword != "maxine") {
 		fprintf(stderr, "Not a Maxine file!\n");
 		return;
 	}
+	
+	// load scene resolution
+	float x, y, width, height;
+	in >> x >> y >> width >> height;
+	setSceneRect(x, y, width, height);
 
 	// load shapes count
-	int numShapes = 0;
+	qint32 numShapes = 0;
 	in >> numShapes;
 
 	// load shapes
-	for (int i = 0; i < numShapes; i++) {
+	for (qint32 i = 0; i < numShapes; i++) {
 		loadShape(in);
 	}
 }
@@ -98,41 +110,41 @@ void MxScene::invalidate(const QRectF & rect, QGraphicsScene::SceneLayers layers
 	QGraphicsScene::invalidate(rect, layers);
 }
 
-void MxScene::saveShape(QTextStream &out, MxPolygonItem *ss) {
+void MxScene::saveShape(QDataStream &out, MxPolygonItem *ss) {
 	auto media = ss->textureFilePath();
 
 	// save texture
-	out << (int) (!media.isEmpty() ? 1 : 0) << " ";
+	out << !media.isEmpty();
 	if (!media.isEmpty()) {
-		out << media << " ";
+		out << media;
 	}
 
 	// save position
 	auto p = ss->pos();
-	out << p.x() << " " << p.y() << " ";
+	out << p.x() << p.y();
 
 	// save vertices count
 	auto vs = ss->vertices();
-	out << (int) vs.size() << " ";
+	out << (qint32) vs.size();
 
 	// save vertices
 	foreach (auto v, vs) {
-		out << v.x() << " " << v.y() << " ";
+		out << v.x() << v.y();
 	}
 
 	// save texture coordinates count
 	auto tcs = ss->texCoords();
-	out << (int) tcs.size() << " ";
+	out << (qint32) tcs.size();
 
 	// save texture coordinates
 	foreach (auto tc, tcs) {
-		out << tc.x() << " " << tc.y() << " ";
+		out << tc.x() << tc.y();
 	}
 }
 
-void MxScene::loadShape(QTextStream &in) {
-	char textureFilePath[256];
-	int hasTexture = 0;
+void MxScene::loadShape(QDataStream &in) {
+	QString textureFilePath;
+	bool hasTexture = 0;
 	int numVertices = 0;
 	int numTexCoords = 0;
 	QPolygonF vertices;
@@ -151,15 +163,14 @@ void MxScene::loadShape(QTextStream &in) {
 
 	// load vertices
 	in >> numVertices;
-	for (auto i = 0; i < numVertices; i++) {
+	for (qint32 i = 0; i < numVertices; i++) {
 		in >> x >> y;
 		vertices << QPointF(x, y);
 	}
 
 	// load texture coordinates
 	in >> numTexCoords;
-	for (auto i = 0; i < numTexCoords; i++) {
-		float x, y;
+	for (qint32 i = 0; i < numTexCoords; i++) {
 		in >> x >> y;
 		texCoords << QPointF(x, y);
 	}

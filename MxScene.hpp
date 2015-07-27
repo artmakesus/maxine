@@ -2,7 +2,7 @@
 #define MX_SCENE_HPP
 
 #include <QGraphicsScene>
-#include <QTextStream>
+#include <QDataStream>
 
 class MxPolygonItem;
 
@@ -25,8 +25,8 @@ public slots:
 					QGraphicsScene::SceneLayers layers = QGraphicsScene::AllLayers);
 
 private:
-	void saveShape(QTextStream &out, MxPolygonItem *);
-	void loadShape(QTextStream &in);
+	void saveShape(QDataStream &out, MxPolygonItem *);
+	void loadShape(QDataStream &in);
 
 	bool mShowMarkers;
 };

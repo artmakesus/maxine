@@ -11,6 +11,7 @@
 #include <QMimeData>
 #include <QUrl>
 #include <QtMath>
+#include <QDebug>
 
 const int MxPolygonItem::CENTER = 0;
 const int MxPolygonItem::FIRST = 1;
@@ -40,7 +41,7 @@ MxPolygonItem::MxPolygonItem(QGraphicsItem *parent) :
 	           << QPointF(0, 1);
 }
 
-MxPolygonItem::MxPolygonItem(const char *texture,
+MxPolygonItem::MxPolygonItem(const QString &texture,
                              const QPointF &pos,
 							 const QPolygonF &vertices,
 							 const QPolygonF &texCoords,
@@ -51,8 +52,8 @@ MxPolygonItem::MxPolygonItem(const char *texture,
 {
 	init();
 
-	if (texture) {
-		mMediaFilePath = texture;
+	if (!texture.isEmpty()) {
+		mTextureFilePath = texture;
 		loadTexture(texture);
 	}
 
@@ -80,10 +81,10 @@ void MxPolygonItem::paint(QPainter *painter,
                            const QStyleOptionGraphicsItem *option,
                            QWidget *widget)
 {
-	if (mMediaFilePath.size() > 0) {
-		drawOpenGL(painter);
-	} else {
+	if (mTextureFilePath.isNull() || mTextureFilePath.isEmpty()) {
 		drawDefault(painter);
+	} else {
+		drawOpenGL(painter);
 	}
 
 	auto s = static_cast<MxScene*>(scene());
@@ -101,14 +102,14 @@ QPolygonF MxPolygonItem::texCoords() {
 }
 
 QString MxPolygonItem::textureFilePath() {
-	return mMediaFilePath;
+	return mTextureFilePath;
 }
 
 void MxPolygonItem::dropEvent(QGraphicsSceneDragDropEvent *evt) {
 	auto mimeData = evt->mimeData();
 	if (mimeData->hasUrls()) {
 		foreach (QUrl url, evt->mimeData()->urls()) {
-			mMediaFilePath = url.path().toUtf8();
+			mTextureFilePath = url.path().toUtf8();
 			auto s = url.path().toUtf8().data();
 			loadTexture(s);
 			break;
@@ -177,8 +178,8 @@ void MxPolygonItem::drawOpenGL(QPainter *painter) {
 
 	glEnable(GL_MULTISAMPLE);
 
-	if (!mTexture) {
-		loadTexture((char *) mMediaFilePath.data());
+	if (!mTexture && !mTextureFilePath.isEmpty()) {
+		loadTexture(mTextureFilePath);
 	}
 
 	mTexture->bind();
@@ -271,7 +272,7 @@ QOpenGLWidget *MxPolygonItem::openGLWidget() {
 	return static_cast<QOpenGLWidget*>(views[0]->viewport());
 }
 
-void MxPolygonItem::loadTexture(const char *filepath) {
+void MxPolygonItem::loadTexture(const QString &filepath) {
 	auto glWidget = openGLWidget();
 	if (!glWidget) {
 		return;
@@ -289,8 +290,6 @@ void MxPolygonItem::loadTexture(const char *filepath) {
 	mTexture->setMagnificationFilter(QOpenGLTexture::Linear);
 
 	glWidget->doneCurrent();
-
-	emit invalidate();
 }
 
 void MxPolygonItem::deleteTexture() {

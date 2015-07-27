@@ -11,7 +11,7 @@ class MxPolygonItem : public QObject, public QGraphicsPolygonItem {
 	Q_OBJECT
 public:
 	MxPolygonItem(QGraphicsItem *parent = 0);
-	MxPolygonItem(const char *texture,
+	MxPolygonItem(const QString &texture,
 	              const QPointF &pos,
 	              const QPolygonF &vertices,
 				  const QPolygonF &texCoords,
@@ -47,10 +47,10 @@ private:
 	QPointF texCoordBetween(int a, int b);
 
 	QOpenGLWidget * openGLWidget();
-	void loadTexture(const char *filepath);
+	void loadTexture(const QString &filepath);
 	void deleteTexture();
 
-	QString mMediaFilePath;
+	QString mTextureFilePath;
 	QOpenGLTexture *mTexture;
 	QPolygonF mVertices;
 	QPolygonF mTexCoords;
