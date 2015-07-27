@@ -80,7 +80,7 @@ void MxPolygonItem::paint(QPainter *painter,
                            const QStyleOptionGraphicsItem *option,
                            QWidget *widget)
 {
-	if (mTexture) {
+	if (mMediaFilePath.size() > 0) {
 		drawOpenGL(painter);
 	} else {
 		drawDefault(painter);
@@ -177,6 +177,10 @@ void MxPolygonItem::drawOpenGL(QPainter *painter) {
 
 	glEnable(GL_MULTISAMPLE);
 
+	if (!mTexture) {
+		loadTexture((char *) mMediaFilePath.data());
+	}
+
 	mTexture->bind();
 
 	// FIXME: using deprecated OpenGL API
@@ -254,15 +258,24 @@ QPointF MxPolygonItem::texCoordBetween(int a, int b) {
 }
 
 QOpenGLWidget *MxPolygonItem::openGLWidget() {
-	auto views = scene()->views();
+	auto s = scene();
+	if (!s) {
+		return nullptr;
+	}
+
+	auto views = s->views();
 	if (views.size() == 0) {
 		return nullptr;
 	}
+
 	return static_cast<QOpenGLWidget*>(views[0]->viewport());
 }
 
 void MxPolygonItem::loadTexture(const char *filepath) {
 	auto glWidget = openGLWidget();
+	if (!glWidget) {
+		return;
+	}
 
 	glWidget->makeCurrent();
 

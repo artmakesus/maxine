@@ -88,6 +88,9 @@ void MxMainWindow::load() {
 	QStringList fileNames;
 	if (dialog.exec()) {
 		fileNames = dialog.selectedFiles();
+		if (fileNames.size() == 0) {
+			return;
+		}
 		mScene->load(fileNames[0]);
 	}
 }
