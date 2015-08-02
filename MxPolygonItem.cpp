@@ -1,6 +1,7 @@
 #include <MxPolygonItem.hpp>
 #include <MxPoint.hpp>
 #include <MxScene.hpp>
+#include <MxTexture.hpp>
 
 #include <QPainter>
 #include <QOpenGLWidget>
@@ -24,11 +25,11 @@ MxPolygonItem::MxPolygonItem(QGraphicsItem *parent) :
 	init();
 
 	// initial vertices
-	mVertices << QPointF(25, 25)
+	mVertices << QPointF(250, 250)
 	          << QPointF(0, 0)
-	          << QPointF(50, 0)
-	          << QPointF(50, 50)
-	          << QPointF(0, 50)
+	          << QPointF(500, 0)
+	          << QPointF(500, 500)
+	          << QPointF(0, 500)
 	          << QPointF(0, 0);
 	setPolygon(mVertices);
 
@@ -41,21 +42,17 @@ MxPolygonItem::MxPolygonItem(QGraphicsItem *parent) :
 	           << QPointF(0, 1);
 }
 
-MxPolygonItem::MxPolygonItem(const QString &texture,
+MxPolygonItem::MxPolygonItem(const QString &textureFilePath,
                              const QPointF &pos,
 							 const QPolygonF &vertices,
 							 const QPolygonF &texCoords,
 							 QGraphicsItem *parent) :
+	mTextureFilePath(textureFilePath),
 	QGraphicsPolygonItem(parent),
 	mTexture(nullptr),
 	mPointSelected(-1)
 {
 	init();
-
-	if (!texture.isEmpty()) {
-		mTextureFilePath = texture;
-		loadTexture(texture);
-	}
 
 	// initial position
 	setPos(pos);
@@ -68,18 +65,13 @@ MxPolygonItem::MxPolygonItem(const QString &texture,
 	mTexCoords = texCoords;
 }
 
-MxPolygonItem::~MxPolygonItem() {
-	deleteTexture();
-}
-
-void MxPolygonItem::init() {
+void MxPolygonItem::init()
+{
 	setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
 	setAcceptDrops(true);
 }
 
-void MxPolygonItem::paint(QPainter *painter,
-                           const QStyleOptionGraphicsItem *option,
-                           QWidget *widget)
+void MxPolygonItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
 	if (mTextureFilePath.isNull() || mTextureFilePath.isEmpty()) {
 		drawDefault(painter);
@@ -93,31 +85,37 @@ void MxPolygonItem::paint(QPainter *painter,
 	}
 }
 
-QPolygonF MxPolygonItem::vertices() {
+QPolygonF MxPolygonItem::vertices()
+{
 	return mVertices;
 }
 
-QPolygonF MxPolygonItem::texCoords() {
+QPolygonF MxPolygonItem::texCoords()
+{
 	return mTexCoords;
 }
 
-QString MxPolygonItem::textureFilePath() {
+QString MxPolygonItem::textureFilePath()
+{
 	return mTextureFilePath;
 }
 
-void MxPolygonItem::dropEvent(QGraphicsSceneDragDropEvent *evt) {
+void MxPolygonItem::dropEvent(QGraphicsSceneDragDropEvent *evt)
+{
 	auto mimeData = evt->mimeData();
+
 	if (mimeData->hasUrls()) {
 		foreach (QUrl url, evt->mimeData()->urls()) {
 			mTextureFilePath = url.path().toUtf8();
-			auto s = url.path().toUtf8().data();
-			loadTexture(s);
+			mTexture = new MxTexture(openGLWidget(), mTextureFilePath);
+			connect(mTexture, &MxTexture::invalidate, this, &MxPolygonItem::invalidate);
 			break;
 		}
 	}
 }
 
-void MxPolygonItem::mousePressEvent(QGraphicsSceneMouseEvent *evt) {
+void MxPolygonItem::mousePressEvent(QGraphicsSceneMouseEvent *evt)
+{
 	auto mouse = evt->pos();
 
 	for (auto i = 0; i < mVertices.size(); i++) {
@@ -134,7 +132,8 @@ void MxPolygonItem::mousePressEvent(QGraphicsSceneMouseEvent *evt) {
 	QGraphicsPolygonItem::mousePressEvent(evt);
 }
 
-void MxPolygonItem::mouseMoveEvent(QGraphicsSceneMouseEvent *evt) {
+void MxPolygonItem::mouseMoveEvent(QGraphicsSceneMouseEvent *evt)
+{
 	if (mPointSelected == -1) {
 		QGraphicsPolygonItem::mouseMoveEvent(evt);
 		return;
@@ -149,13 +148,15 @@ void MxPolygonItem::mouseMoveEvent(QGraphicsSceneMouseEvent *evt) {
 	setPolygon(mVertices);
 }
 
-void MxPolygonItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *evt) {
+void MxPolygonItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *evt)
+{
 	QGraphicsPolygonItem::mouseReleaseEvent(evt);
 
 	mPointSelected = -1;
 }
 
-void MxPolygonItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *evt) {
+void MxPolygonItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *evt)
+{
 	QGraphicsPolygonItem::mouseDoubleClickEvent(evt);
 
 	auto mousePos = evt->pos();
@@ -174,7 +175,8 @@ void MxPolygonItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *evt) {
 	}
 }
 
-void MxPolygonItem::drawDefault(QPainter *painter) {
+void MxPolygonItem::drawDefault(QPainter *painter)
+{
 	painter->setRenderHint(QPainter::Antialiasing);
 
 	painter->setBrush(QBrush(QColor(0, 216, 255)));
@@ -185,13 +187,14 @@ void MxPolygonItem::drawDefault(QPainter *painter) {
 	painter->drawPolygon(tmp);
 }
 
-void MxPolygonItem::drawOpenGL(QPainter *painter) {
+void MxPolygonItem::drawOpenGL(QPainter *painter)
+{
 	painter->beginNativePainting();
 
 	glEnable(GL_MULTISAMPLE);
 
 	if (!mTexture && !mTextureFilePath.isEmpty()) {
-		loadTexture(mTextureFilePath);
+		mTexture = new MxTexture(openGLWidget(), mTextureFilePath);
 	}
 
 	mTexture->bind();
@@ -209,7 +212,8 @@ void MxPolygonItem::drawOpenGL(QPainter *painter) {
 	painter->endNativePainting();
 }
 
-void MxPolygonItem::drawMarkers(QPainter *painter) {
+void MxPolygonItem::drawMarkers(QPainter *painter)
+{
 	painter->setBrush(QBrush(QColor(0, 0, 0)));
 	painter->setPen(QPen(QColor(0, 160, 240)));
 
@@ -218,7 +222,8 @@ void MxPolygonItem::drawMarkers(QPainter *painter) {
 	}
 }
 
-void MxPolygonItem::addPoint(float x, float y) {
+void MxPolygonItem::addPoint(float x, float y)
+{
 	float shortestDistance = 9999;
 	int shortest = -1;
 
@@ -267,7 +272,8 @@ void MxPolygonItem::addPoint(float x, float y) {
 	}
 }
 
-void MxPolygonItem::removePoint(float x, float y) {
+void MxPolygonItem::removePoint(float x, float y)
+{
 	float shortestDistance = 9999;
 	int shortest = -1;
 
@@ -305,7 +311,8 @@ void MxPolygonItem::removePoint(float x, float y) {
 	}
 }
 
-QPointF MxPolygonItem::texCoordBetween(int a, int b) {
+QPointF MxPolygonItem::texCoordBetween(int a, int b)
+{
 	auto ta = mTexCoords[a];
 	auto tb = mTexCoords[b];
 
@@ -324,7 +331,8 @@ QPointF MxPolygonItem::texCoordBetween(int a, int b) {
 	return QPointF(0, 1);
 }
 
-QOpenGLWidget *MxPolygonItem::openGLWidget() {
+QOpenGLWidget *MxPolygonItem::openGLWidget()
+{
 	auto s = scene();
 	if (!s) {
 		return nullptr;
@@ -335,36 +343,6 @@ QOpenGLWidget *MxPolygonItem::openGLWidget() {
 		return nullptr;
 	}
 
-	return static_cast<QOpenGLWidget*>(views[0]->viewport());
-}
-
-void MxPolygonItem::loadTexture(const QString &filepath) {
-	auto glWidget = openGLWidget();
-	if (!glWidget) {
-		return;
-	}
-
-	glWidget->makeCurrent();
-
-	if (mTexture) {
-		delete mTexture;
-	}
-
-	QImage image(filepath);
-	mTexture = new QOpenGLTexture(image.mirrored());
-	mTexture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
-	mTexture->setMagnificationFilter(QOpenGLTexture::Linear);
-
-	glWidget->doneCurrent();
-}
-
-void MxPolygonItem::deleteTexture() {
-	if (mTexture) {
-		return;
-	}
-
-	auto glWidget = openGLWidget();
-	glWidget->makeCurrent();
-	delete mTexture;
-	glWidget->doneCurrent();
+	auto widget = static_cast<QOpenGLWidget*>(views[0]->viewport());
+	return widget;
 }

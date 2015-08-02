@@ -6,8 +6,10 @@ TEMPLATE = app
 TARGET = maxine
 INCLUDEPATH += .
 
-QT += core widgets
+QT += core widgets multimedia multimediawidgets
+
 QMAKE_CXXFLAGS += -std=c++14
+LIBS += -lyuv
 
 # Input
 SOURCES += \
@@ -18,6 +20,8 @@ MxPolygonItem.cpp \
 MxOpenGLWidget.cpp	\
 MxPoint.cpp \
 MxVector2D.cpp \
+MxVideoSurface.cpp \
+MxTexture.cpp \
 
 HEADERS += \
 MxMainWindow.hpp \
@@ -26,3 +30,5 @@ MxPolygonItem.hpp \
 MxOpenGLWidget.hpp \
 MxPoint.hpp \
 MxVector2D.hpp \
+MxVideoSurface.hpp \
+MxTexture.hpp \

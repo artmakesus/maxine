@@ -6,6 +6,7 @@ An open-source cross-platform projection mapping tool written in C++ and Qt.
 Requirements
 ------------
 * [Qt 5.5+](https://www.qt.io/download-open-source)
+* [libyuv](https://code.google.com/p/libyuv/)
 
 Build
 -----

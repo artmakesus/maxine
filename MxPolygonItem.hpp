@@ -4,6 +4,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsPolygonItem>
 
+class MxTexture;
 class QOpenGLWidget;
 class QOpenGLTexture;
 
@@ -11,12 +12,11 @@ class MxPolygonItem : public QObject, public QGraphicsPolygonItem {
 	Q_OBJECT
 public:
 	MxPolygonItem(QGraphicsItem *parent = 0);
-	MxPolygonItem(const QString &texture,
+	MxPolygonItem(const QString &textureFilePath,
 	              const QPointF &pos,
 	              const QPolygonF &vertices,
 				  const QPolygonF &texCoords,
 				  QGraphicsItem *parent = 0);
-	~MxPolygonItem();
 
 	virtual void paint(QPainter *painter,
 	                   const QStyleOptionGraphicsItem *option,
@@ -28,8 +28,7 @@ public:
 	QString textureFilePath();
 
 signals:
-	void invalidate(const QRectF & rect = QRectF(),
-	                QGraphicsScene::SceneLayers layers = QGraphicsScene::AllLayers);
+	void invalidate(const QRectF & rect = QRectF(), QGraphicsScene::SceneLayers layers = QGraphicsScene::AllLayers);
 
 protected:
 	void dropEvent(QGraphicsSceneDragDropEvent *evt) override;
@@ -47,13 +46,11 @@ private:
 	void addPoint(float x, float y);
 	void removePoint(float x, float y);
 	QPointF texCoordBetween(int a, int b);
-
 	QOpenGLWidget * openGLWidget();
-	void loadTexture(const QString &filepath);
-	void deleteTexture();
 
 	QString mTextureFilePath;
-	QOpenGLTexture *mTexture;
+	MxTexture *mTexture;
+
 	QPolygonF mVertices;
 	QPolygonF mTexCoords;
 
