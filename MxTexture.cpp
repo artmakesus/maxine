@@ -128,25 +128,16 @@ void MxTexture::onVideoFrame(const QVideoFrame &frame)
 	}
 
 	mOpenGLWidget->makeCurrent();
-
-	// FIXME: video color doesn't appear correctly
-	auto dst = new uint8_t[frame.width() * frame.height() * 4];
-	auto src = frame.bits();
-	auto bpl = frame.bytesPerLine();
-	auto total = frame.width() * frame.height();
-	auto status = NV12ToARGB(src, bpl, src + bpl, bpl * 2, dst, frame.width() * 4, frame.width(), frame.height());
-
+	
 	if (mOpenGLTexture && mOpenGLTexture->isCreated()) {
-		QImage image(dst, frame.width(), frame.height(), QImage::Format_ARGB32);
-		mOpenGLTexture->setData(image);
+		QImage image(frame.bits(), frame.width(), frame.height(), QImage::Format_Grayscale8);
+		mOpenGLTexture->setData(image.mirrored());
 	} else {
-		QImage image(dst, frame.width(), frame.height(), QImage::Format_ARGB32);
-		mOpenGLTexture = new QOpenGLTexture(image);
+		QImage image(frame.bits(), frame.width(), frame.height(), QImage::Format_Grayscale8);
+		mOpenGLTexture = new QOpenGLTexture(image.mirrored());
 		mOpenGLTexture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
 		mOpenGLTexture->setMagnificationFilter(QOpenGLTexture::Linear);
 	}
-
-	delete dst;
 
 	mOpenGLWidget->doneCurrent();
 
