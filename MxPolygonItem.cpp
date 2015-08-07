@@ -44,9 +44,9 @@ MxPolygonItem::MxPolygonItem(QGraphicsItem *parent) :
 
 MxPolygonItem::MxPolygonItem(const QString &textureFilePath,
                              const QPointF &pos,
-							 const QPolygonF &vertices,
-							 const QPolygonF &texCoords,
-							 QGraphicsItem *parent) :
+			     const QPolygonF &vertices,
+			     const QPolygonF &texCoords,
+			     QGraphicsItem *parent) :
 	mTextureFilePath(textureFilePath),
 	QGraphicsPolygonItem(parent),
 	mTexture(nullptr),
@@ -175,6 +175,11 @@ void MxPolygonItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *evt)
 	}
 }
 
+/**
+ * drawDefault - draw only the polygon
+ * @painter: painter used to draw the polygon
+ *
+ */
 void MxPolygonItem::drawDefault(QPainter *painter)
 {
 	painter->setRenderHint(QPainter::Antialiasing);
@@ -187,6 +192,11 @@ void MxPolygonItem::drawDefault(QPainter *painter)
 	painter->drawPolygon(tmp);
 }
 
+/**
+ * drawOpenGL - draw the polygon with texture
+ * @painter: painter used to draw the polygon and texture
+ *
+ */
 void MxPolygonItem::drawOpenGL(QPainter *painter)
 {
 	painter->beginNativePainting();
@@ -212,6 +222,11 @@ void MxPolygonItem::drawOpenGL(QPainter *painter)
 	painter->endNativePainting();
 }
 
+/**
+ * drawMarkers - draw indicators of the polygon's points
+ * @painter: painter used to draw the points
+ *
+ */
 void MxPolygonItem::drawMarkers(QPainter *painter)
 {
 	painter->setBrush(QBrush(QColor(0, 0, 0)));
@@ -222,6 +237,13 @@ void MxPolygonItem::drawMarkers(QPainter *painter)
 	}
 }
 
+/**
+ * addPoint - add a point located at x and y
+ * @x: target x-coordinate
+ * @y: target y-coordinate
+ *
+ * Current implementation requires x and y to be inside the polygon
+ */
 void MxPolygonItem::addPoint(float x, float y)
 {
 	float shortestDistance = 9999;
@@ -272,6 +294,12 @@ void MxPolygonItem::addPoint(float x, float y)
 	}
 }
 
+/**
+ * removePoint - remove a point located near x and y
+ * @x: target x-coordinate
+ * @y: target y-coordinate
+ *
+ */
 void MxPolygonItem::removePoint(float x, float y)
 {
 	float shortestDistance = 9999;
@@ -311,6 +339,13 @@ void MxPolygonItem::removePoint(float x, float y)
 	}
 }
 
+/**
+ * texCoordBetween - calculate middle point between two texture coordinates
+ * @a: index of texture coordinate before the middle point
+ * @b: index of texture coordinate after the middle point
+ *
+ * Returns the middle point
+ */
 QPointF MxPolygonItem::texCoordBetween(int a, int b)
 {
 	auto ta = mTexCoords[a];
@@ -328,6 +363,7 @@ QPointF MxPolygonItem::texCoordBetween(int a, int b)
 	} else if (ta.x() == 1 && ta.y() == 0) {
 		return QPointF(0, 0);
 	}
+
 	return QPointF(0, 1);
 }
 

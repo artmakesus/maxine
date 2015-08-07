@@ -10,7 +10,8 @@ MxVector2D::MxVector2D(const QVector2D &vector) :
 {
 }
 
-QVector2D MxVector2D::project(const QVector2D &p, const QVector2D &onto) {
+QVector2D MxVector2D::project(const QVector2D &p, const QVector2D &onto)
+{
 	qreal d = QVector2D::dotProduct(onto, onto);
 
 	if (d > 0) {

@@ -15,20 +15,21 @@ public:
 	MxPolygonItem(const QString &textureFilePath,
 	              const QPointF &pos,
 	              const QPolygonF &vertices,
-				  const QPolygonF &texCoords,
-				  QGraphicsItem *parent = 0);
+		      const QPolygonF &texCoords,
+		      QGraphicsItem *parent = 0);
 
 	virtual void paint(QPainter *painter,
-	                   const QStyleOptionGraphicsItem *option,
-	                   QWidget *widget = 0)
-					   override;
+			   const QStyleOptionGraphicsItem *option,
+			   QWidget *widget = 0)
+			   override;
 
 	QPolygonF vertices();
 	QPolygonF texCoords();
 	QString textureFilePath();
 
 signals:
-	void invalidate(const QRectF & rect = QRectF(), QGraphicsScene::SceneLayers layers = QGraphicsScene::AllLayers);
+	void invalidate(const QRectF & rect = QRectF(),
+			QGraphicsScene::SceneLayers layers = QGraphicsScene::AllLayers);
 
 protected:
 	void dropEvent(QGraphicsSceneDragDropEvent *evt) override;

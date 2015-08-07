@@ -13,11 +13,13 @@ MxScene::MxScene(QObject *parent) :
 	setBackgroundBrush(QBrush(QColor(0, 0, 0)));
 }
 
-void MxScene::new_() {
+void MxScene::new_()
+{
 	clear();
 }
 
-void MxScene::save(const QString &filename) {
+void MxScene::save(const QString &filename)
+{
 	QFile file(filename);
 	if (!file.open(QIODevice::WriteOnly)) {
 		return;
@@ -45,7 +47,8 @@ void MxScene::save(const QString &filename) {
 	file.close();
 }
 
-void MxScene::load(const QString &filename) {
+void MxScene::load(const QString &filename)
+{
 	clear();
 
 	QFile file(filename);
@@ -80,11 +83,13 @@ void MxScene::load(const QString &filename) {
 	}
 }
 
-bool MxScene::showMarkers() {
+bool MxScene::showMarkers()
+{
 	return mShowMarkers;
 }
 
-void MxScene::addShape(MxPolygonItem *shape) {
+void MxScene::addShape(MxPolygonItem *shape)
+{
 	if (!shape) {
 		shape = new MxPolygonItem;
 	}
@@ -94,23 +99,27 @@ void MxScene::addShape(MxPolygonItem *shape) {
 	addItem(shape);
 }
 
-void MxScene::deleteShape(MxPolygonItem *shape) {
+void MxScene::deleteShape(MxPolygonItem *shape)
+{
 	auto items = selectedItems();
 	foreach (auto item, items) {
 		removeItem(item);
 	}
 }
 
-void MxScene::toggleMarkers() {
+void MxScene::toggleMarkers()
+{
 	mShowMarkers = !mShowMarkers;
 	invalidate();
 }
 
-void MxScene::invalidate(const QRectF & rect, QGraphicsScene::SceneLayers layers) {
+void MxScene::invalidate(const QRectF & rect, QGraphicsScene::SceneLayers layers)
+{
 	QGraphicsScene::invalidate(rect, layers);
 }
 
-void MxScene::saveShape(QDataStream &out, MxPolygonItem *ss) {
+void MxScene::saveShape(QDataStream &out, MxPolygonItem *ss)
+{
 	auto media = ss->textureFilePath();
 
 	// save texture
@@ -142,7 +151,8 @@ void MxScene::saveShape(QDataStream &out, MxPolygonItem *ss) {
 	}
 }
 
-void MxScene::loadShape(QDataStream &in) {
+void MxScene::loadShape(QDataStream &in)
+{
 	QString textureFilePath;
 	bool hasTexture = 0;
 	int numVertices = 0;

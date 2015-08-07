@@ -1,11 +1,13 @@
 #include "MxPoint.hpp"
 #include "MxVector2D.hpp"
 
-float MxPoint::distance(const QPointF &p, const QPointF &q) {
+float MxPoint::distance(const QPointF &p, const QPointF &q)
+{
 	return (p - q).manhattanLength();
 }
 
-float MxPoint::distance(const QPointF &p, const QLineF &line) {
+float MxPoint::distance(const QPointF &p, const QLineF &line)
+{
 	auto dx = line.p1().x() - line.p2().x();
 	auto dy = line.p1().y() - line.p2().y();
 	auto d = dx * dx + dy * dy;
@@ -26,12 +28,13 @@ float MxPoint::distance(const QPointF &p, const QLineF &line) {
 	return distance(p, projection);
 }
 
-bool MxPoint::intersectLine(const QPointF &p, const QLineF &line) {
+bool MxPoint::intersectLine(const QPointF &p, const QLineF &line)
+{
 	MxVector2D d(line.p1() - line.p2());
 	MxVector2D lp(p - line.p1());
 	MxVector2D pr(MxVector2D::project(lp, d));
 
 	return lp == pr && 
 	       pr.length() <= d.length() &&
-		   QVector2D::dotProduct(pr, d) >= 0;
+	       QVector2D::dotProduct(pr, d) >= 0;
 }

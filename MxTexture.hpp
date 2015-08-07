@@ -21,7 +21,8 @@ public:
 	void release();
 
 signals:
-	void invalidate(const QRectF & rect = QRectF(), QGraphicsScene::SceneLayers layers = QGraphicsScene::AllLayers);
+	void invalidate(const QRectF & rect = QRectF(),
+			QGraphicsScene::SceneLayers layers = QGraphicsScene::AllLayers);
 
 private:
 	static QStringList IMAGE_SUFFIXES;

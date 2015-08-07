@@ -9,5 +9,4 @@ void MxVideoWidget::paintEvent(QPaintEvent *event)
 {
 	auto pixmap = grab(rect());
 	emit onVideoFrame(&pixmap);
-	//QVideoWidget::paintEvent(event);
 }

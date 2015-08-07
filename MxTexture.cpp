@@ -8,17 +8,19 @@
 #include <QOpenGLWidget>
 #include <QOpenGLTexture>
 
-QStringList MxTexture::IMAGE_SUFFIXES = QStringList() << "jpg"
-													  << "jpeg"
-													  << "png"
-													  << "tga"
-													  << "bmp";
+QStringList MxTexture::IMAGE_SUFFIXES =
+		QStringList() << "jpg"
+			      << "jpeg"
+			      << "png"
+			      << "tga"
+			      << "bmp";
 
-QStringList MxTexture::VIDEO_SUFFIXES = QStringList() << "mpg"
-													  << "mpeg"
-													  << "mp4"
-													  << "avi"
-													  << "mkv";
+QStringList MxTexture::VIDEO_SUFFIXES =
+		QStringList() << "mpg"
+			      << "mpeg"
+			      << "mp4"
+			      << "avi"
+			      << "mkv";
 
 MxTexture::MxTexture(QOpenGLWidget *widget, const QString &filePath, QObject *parent) :
 	QObject(parent),

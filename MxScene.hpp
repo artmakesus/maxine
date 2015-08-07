@@ -22,7 +22,7 @@ public slots:
 	void toggleMarkers();
 
 	void invalidate(const QRectF & rect = QRectF(),
-					QGraphicsScene::SceneLayers layers = QGraphicsScene::AllLayers);
+			QGraphicsScene::SceneLayers layers = QGraphicsScene::AllLayers);
 
 private:
 	void saveShape(QDataStream &out, MxPolygonItem *);

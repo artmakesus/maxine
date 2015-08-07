@@ -5,7 +5,8 @@ MxVideoSurface::MxVideoSurface(QObject *parent) :
 {
 }
 
-bool MxVideoSurface::present(const QVideoFrame &frame) {
+bool MxVideoSurface::present(const QVideoFrame &frame)
+{
 	auto dup = frame;
 
 	dup.map(QAbstractVideoBuffer::ReadOnly);
@@ -17,6 +18,5 @@ bool MxVideoSurface::present(const QVideoFrame &frame) {
 
 QList<QVideoFrame::PixelFormat> MxVideoSurface::supportedPixelFormats(QAbstractVideoBuffer::HandleType type) const
 {
-	return QList<QVideoFrame::PixelFormat>()
-			<< QVideoFrame::Format_RGB24;
+	return QList<QVideoFrame::PixelFormat>() << QVideoFrame::Format_RGB24;
 }

@@ -23,11 +23,13 @@ MxMainWindow::MxMainWindow(QWidget *parent, Qt::WindowFlags f) :
 	setCentralWidget(mGraphicsView);
 }
 
-void MxMainWindow::initMenuBar() {
+void MxMainWindow::initMenuBar()
+{
 	menuBar()->setNativeMenuBar(true);
 }
 
-void MxMainWindow::initMenus() {
+void MxMainWindow::initMenus()
+{
 	mFileMenu = menuBar()->addMenu(tr("&File"));
 	mNewAction = mFileMenu->addAction(tr("&New Project"));
 	mLoadAction = mFileMenu->addAction(tr("&Load Project"));
@@ -42,7 +44,8 @@ void MxMainWindow::initMenus() {
 	mToggleMarkersAction = mViewMenu->addAction(tr("Toggle &Markers"));
 }
 
-void MxMainWindow::initActions() {
+void MxMainWindow::initActions()
+{
 	// File actions
 	mNewAction->setShortcut(QKeySequence(tr("Ctrl+N", "File|New Project")));
 	mLoadAction->setShortcut(QKeySequence(tr("Ctrl+L", "File|Load Project")));
@@ -64,11 +67,13 @@ void MxMainWindow::initActions() {
 	connect(mToggleMarkersAction, &QAction::triggered, mScene, &MxScene::toggleMarkers);
 }
 
-void MxMainWindow::new_() {
+void MxMainWindow::new_()
+{
 	mScene->new_();
 }
 
-void MxMainWindow::save() {
+void MxMainWindow::save()
+{
 	QString filename = QFileDialog::getSaveFileName(
 			this,
 			tr("Save File"),
@@ -80,7 +85,8 @@ void MxMainWindow::save() {
 	}
 }
 
-void MxMainWindow::load() {
+void MxMainWindow::load()
+{
 	QFileDialog dialog(this);
 	dialog.setFileMode(QFileDialog::ExistingFile);
 	dialog.setNameFilter(tr("Maxine file (*.mxn)"));
@@ -95,15 +101,18 @@ void MxMainWindow::load() {
 	}
 }
 
-void MxMainWindow::addShape() {
+void MxMainWindow::addShape()
+{
 	mScene->addShape();
 }
 
-void MxMainWindow::deleteShape() {
+void MxMainWindow::deleteShape()
+{
 	mScene->deleteShape();
 }
 
-void MxMainWindow::toggleFullscreen() {
+void MxMainWindow::toggleFullscreen()
+{
 	if (isFullScreen()) {
 		showNormal();
 	} else {
