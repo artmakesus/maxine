@@ -8,10 +8,6 @@
 #include <QOpenGLWidget>
 #include <QOpenGLTexture>
 
-#include <libyuv/convert_argb.h>
-
-using namespace libyuv;
-
 QStringList MxTexture::IMAGE_SUFFIXES = QStringList() << "jpg"
 													  << "jpeg"
 													  << "png"

@@ -9,7 +9,7 @@ INCLUDEPATH += .
 QT += core widgets multimedia multimediawidgets
 
 QMAKE_CXXFLAGS += -std=c++14
-LIBS += -lyuv
+LIBS += 
 
 # Input
 SOURCES += \
