@@ -4,7 +4,8 @@
 #include <QGraphicsScene>
 #include <QDataStream>
 
-class MxPolygonItem;
+class MxSceneItem;
+class MxScene;
 
 class MxScene : public QGraphicsScene {
 public:
@@ -14,21 +15,23 @@ public:
 	void save(const QString &filename);
 	void load(const QString &filename);
 
-	bool showMarkers();
+	bool isMarkersShown();
 
 public slots:
-	void addShape(MxPolygonItem *shape = 0);
-	void deleteShape(MxPolygonItem *shape = 0);
+	void addShape(MxSceneItem *shape = 0);
+	void deleteShape(MxSceneItem *shape = 0);
 	void toggleMarkers();
 
-	void invalidate(const QRectF & rect = QRectF(),
-			QGraphicsScene::SceneLayers layers = QGraphicsScene::AllLayers);
+	void invalidate(const QRectF & rect = QRectF(), QGraphicsScene::SceneLayers layers = QGraphicsScene::AllLayers);
 
 private:
-	void saveShape(QDataStream &out, MxPolygonItem *);
+	void saveShape(QDataStream &out, MxSceneItem *);
 	void loadShape(QDataStream &in);
 
-	bool mShowMarkers;
+	bool mIsMarkersShown;
 };
+
+QDataStream & operator<<(QDataStream &out, const MxScene *scene);
+QDataStream & operator>>(QDataStream &in, MxScene *scene);
 
 #endif

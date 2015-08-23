@@ -72,14 +72,8 @@ void MxMainWindow::new_()
 	mScene->new_();
 }
 
-void MxMainWindow::save()
-{
-	QString filename = QFileDialog::getSaveFileName(
-			this,
-			tr("Save File"),
-			"",
-			tr("Maxine file (*.mxn)")
-	);
+void MxMainWindow::save() {
+	QString filename = QFileDialog::getSaveFileName(this, tr("Save File"), "", tr("Maxine file (*.mxn)"));
 	if (filename.size() > 0) {
 		mScene->save(filename);
 	}

@@ -8,6 +8,7 @@ INCLUDEPATH += .
 
 QT += core widgets multimedia multimediawidgets
 
+QMAKE_CXX = clang++
 QMAKE_CXXFLAGS += -std=c++11
 LIBS += 
 
@@ -16,19 +17,19 @@ SOURCES += \
 main.cpp \
 MxMainWindow.cpp \
 MxScene.cpp \
-MxPolygonItem.cpp \
 MxOpenGLWidget.cpp	\
 MxPoint.cpp \
 MxVector2D.cpp \
 MxVideoSurface.cpp \
 MxTexture.cpp \
+MxSceneItem.cpp \
 
 HEADERS += \
 MxMainWindow.hpp \
 MxScene.hpp \
-MxPolygonItem.hpp \
 MxOpenGLWidget.hpp \
 MxPoint.hpp \
 MxVector2D.hpp \
 MxVideoSurface.hpp \
 MxTexture.hpp \
+MxSceneItem.hpp \
