@@ -1,5 +1,6 @@
 #include <MxScene.hpp>
 #include <MxSceneItem.hpp>
+#include <MxSceneIPC.hpp>
 
 #include <QGraphicsSceneMouseEvent>
 #include <QDataStream>
@@ -7,10 +8,12 @@
 #include <QFile>
 
 MxScene::MxScene(QObject *parent) :
-   QGraphicsScene(parent),
-   mIsMarkersShown(true)
+	QGraphicsScene(parent),
+	mIsMarkersShown(true)
 {
 	setBackgroundBrush(QBrush(QColor(0, 0, 0)));
+
+	mIPC = new MxSceneIPC(this);
 }
 
 void MxScene::new_()
@@ -63,6 +66,28 @@ void MxScene::load(const QString &filename)
 bool MxScene::isMarkersShown()
 {
 	return mIsMarkersShown;
+}
+
+bool MxScene::createSharedTexture(const QString &key, int index, int width, int height) const
+{
+	auto list = items();
+	if (list.size() <= index) {
+		return "";
+	}
+
+	auto item = static_cast<MxSceneItem*>(list[index]);
+	return item->createSharedTexture(key, width, height);
+}
+
+bool MxScene::invalidateSharedTexture(int index) const
+{
+	auto list = items();
+	if (list.size() <= index) {
+		return "";
+	}
+
+	auto item = static_cast<MxSceneItem*>(list[index]);
+	return item->invalidateSharedTexture();
 }
 
 void MxScene::addShape(MxSceneItem *shape)

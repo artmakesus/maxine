@@ -7,12 +7,13 @@
 #include <QBrush>
 #include <QPen>
 
+class MxTexture;
+
 class QGraphicsItem;
 class QPainter;
 class QOpenGLWidget;
 class QStyleOptionGraphicsItem;
 class QWidget;
-class MxTexture;
 
 class MxSceneItem : public QObject, public QAbstractGraphicsShapeItem {
 	Q_OBJECT
@@ -24,9 +25,12 @@ public:
 	void setTextureFilePath(const QString &filepath);
 	void setVertices(const QPolygonF &vertices);
 	void setTexCoords(const QPolygonF &texCoords);
-	QPolygonF vertices();
-	QPolygonF texCoords();
-	QString textureFilePath();
+	QPolygonF vertices() const;
+	QPolygonF texCoords() const;
+	QString textureFilePath() const;
+
+	bool createSharedTexture(const QString &key, int width, int height);
+	bool invalidateSharedTexture();
 
 	QRectF boundingRect() const;
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);

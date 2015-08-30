@@ -7,6 +7,7 @@
 #include <QMediaPlayer>
 #include <QOpenGLWidget>
 #include <QOpenGLTexture>
+#include <QSharedMemory>
 
 QStringList MxTexture::IMAGE_SUFFIXES =
 		QStringList() << "jpg"
@@ -22,10 +23,30 @@ QStringList MxTexture::VIDEO_SUFFIXES =
 			      << "avi"
 			      << "mkv";
 
+MxTexture::MxTexture(QOpenGLWidget *widget, const QString &key, int width, int height, QObject *parent) :
+	QObject(parent),
+	mOpenGLWidget(widget),
+	mOpenGLTexture(nullptr)
+{
+	if (!mOpenGLWidget) {
+		fprintf(stderr, "MxTexture: empty OpenGL widget\n");
+		return;
+	}
+
+	mOpenGLWidget->makeCurrent();
+
+	mSharedMemory = new QSharedMemory(key, this);
+	mSharedMemory->create(width * height * 4);
+	mSharedTextureWidth = width;
+	mSharedTextureHeight = height;
+
+	mOpenGLWidget->doneCurrent();
+}
+
 MxTexture::MxTexture(QOpenGLWidget *widget, const QString &filePath, QObject *parent) :
 	QObject(parent),
-	mOpenGLTexture(nullptr),
-	mOpenGLWidget(widget)
+	mOpenGLWidget(widget),
+	mOpenGLTexture(nullptr)
 {
 	if (!mOpenGLWidget) {
 		fprintf(stderr, "MxTexture: empty OpenGL widget\n");
@@ -66,6 +87,28 @@ void MxTexture::release()
 	if (mOpenGLTexture) {
 		mOpenGLTexture->release();
 	}
+}
+
+bool MxTexture::invalidateSharedTexture()
+{
+	if (!mSharedMemory) {
+		return false;
+	}
+
+	mOpenGLWidget->makeCurrent();
+	mSharedMemory->lock();
+
+	auto data = static_cast<uchar *>(mSharedMemory->data());
+	QImage image(data, mSharedTextureWidth, mSharedTextureHeight, QImage::Format_ARGB32);
+	mOpenGLTexture = new QOpenGLTexture(image.mirrored());
+	mOpenGLTexture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
+	mOpenGLTexture->setMagnificationFilter(QOpenGLTexture::Linear);
+	emit invalidate();
+
+	mSharedMemory->unlock();
+	mOpenGLWidget->doneCurrent();
+
+	return true;
 }
 
 void MxTexture::loadImage(const QString &filePath)

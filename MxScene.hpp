@@ -4,8 +4,9 @@
 #include <QGraphicsScene>
 #include <QDataStream>
 
-class MxSceneItem;
 class MxScene;
+class MxSceneItem;
+class MxSceneIPC;
 
 class MxScene : public QGraphicsScene {
 public:
@@ -16,6 +17,8 @@ public:
 	void load(const QString &filename);
 
 	bool isMarkersShown();
+	bool createSharedTexture(const QString &key, int index, int width, int height) const;
+	bool invalidateSharedTexture(int index) const;
 
 public slots:
 	void addShape(MxSceneItem *shape = 0);
@@ -25,10 +28,9 @@ public slots:
 	void invalidate(const QRectF & rect = QRectF(), QGraphicsScene::SceneLayers layers = QGraphicsScene::AllLayers);
 
 private:
-	void saveShape(QDataStream &out, MxSceneItem *);
-	void loadShape(QDataStream &in);
-
 	bool mIsMarkersShown;
+
+	MxSceneIPC *mIPC;
 };
 
 QDataStream & operator<<(QDataStream &out, const MxScene *scene);

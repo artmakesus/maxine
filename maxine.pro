@@ -6,7 +6,7 @@ TEMPLATE = app
 TARGET = maxine
 INCLUDEPATH += .
 
-QT += core widgets multimedia multimediawidgets
+QT += core widgets multimedia multimediawidgets dbus
 
 QMAKE_CXX = clang++
 QMAKE_CXXFLAGS += -std=c++11
@@ -17,12 +17,13 @@ SOURCES += \
 main.cpp \
 MxMainWindow.cpp \
 MxScene.cpp \
-MxOpenGLWidget.cpp	\
+MxOpenGLWidget.cpp \
 MxPoint.cpp \
 MxVector2D.cpp \
 MxVideoSurface.cpp \
 MxTexture.cpp \
 MxSceneItem.cpp \
+MxSceneIPC.cpp \
 
 HEADERS += \
 MxMainWindow.hpp \
@@ -33,3 +34,4 @@ MxVector2D.hpp \
 MxVideoSurface.hpp \
 MxTexture.hpp \
 MxSceneItem.hpp \
+MxSceneIPC.hpp \

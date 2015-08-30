@@ -65,19 +65,38 @@ void MxSceneItem::setTexCoords(const QPolygonF &texCoords)
 	mTexCoords = texCoords;
 }
 
-QPolygonF MxSceneItem::vertices()
+QPolygonF MxSceneItem::vertices() const
 {
 	return mVertices;
 }
 
-QPolygonF MxSceneItem::texCoords()
+QPolygonF MxSceneItem::texCoords() const
 {
 	return mTexCoords;
 }
 
-QString MxSceneItem::textureFilePath()
+QString MxSceneItem::textureFilePath() const
 {
 	return mTextureFilePath;
+}
+
+bool MxSceneItem::createSharedTexture(const QString &key, int width, int height)
+{
+	if (mTexture) {
+		delete mTexture;
+	}
+	mTexture = new MxTexture(openGLWidget(), key, width, height, this);
+	return true;
+}
+
+bool MxSceneItem::invalidateSharedTexture()
+{
+	if (mTexture) {
+		auto b = mTexture->invalidateSharedTexture();
+		emit invalidate();
+		return b;
+	}
+	return false;
 }
 
 QRectF MxSceneItem::boundingRect() const
@@ -219,7 +238,7 @@ void MxSceneItem::drawMarkers(QPainter *painter)
 
 bool MxSceneItem::hasTexture() const
 {
-	return !(mTextureFilePath.isNull() || mTextureFilePath.isEmpty());
+	return mTexture;
 }
 
 bool MxSceneItem::isMarkersShown() const
