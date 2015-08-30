@@ -45,7 +45,7 @@ MxTexture::MxTexture(QOpenGLWidget *widget, const QString &filePath, QObject *pa
 
 MxTexture::~MxTexture()
 {
-	if (mOpenGLWidget && mOpenGLTexture) {
+	if (!(mOpenGLWidget && mOpenGLTexture)) {
 		return;
 	}
 
