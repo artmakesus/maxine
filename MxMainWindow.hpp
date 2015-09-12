@@ -11,12 +11,6 @@ public:
 	MxMainWindow(QWidget *parent = 0, Qt::WindowFlags f = 0);
 
 private:
-	void initMenuBar();
-	void initMenus();
-	void initActions();
-	void addShape();
-	void deleteShape();
-
 	MxScene *mScene;
 	QGraphicsView *mGraphicsView;
 
@@ -31,6 +25,10 @@ private:
 	QAction *mDeleteShapeAction;
 	QAction *mToggleFullscreenAction;
 	QAction *mToggleMarkersAction;
+
+	void initMenuBar();
+	void initMenus();
+	void initActions();
 
 private slots:
 	void new_();

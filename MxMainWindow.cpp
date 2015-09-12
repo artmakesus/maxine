@@ -10,15 +10,16 @@
 MxMainWindow::MxMainWindow(QWidget *parent, Qt::WindowFlags f) :
 	QMainWindow(parent, f)
 {
+	// Setup Window
 	setWindowTitle(tr("Maxine"));
-
-	mScene = new MxScene;
-	mGraphicsView = new QGraphicsView(mScene);
-	mGraphicsView->setViewport(new MxOpenGLWidget);
-
 	initMenuBar();
 	initMenus();
 	initActions();
+
+	// Setup Scene
+	mScene = new MxScene;
+	mGraphicsView = new QGraphicsView(mScene);
+	mGraphicsView->setViewport(new MxOpenGLWidget);
 
 	setCentralWidget(mGraphicsView);
 }
@@ -30,15 +31,18 @@ void MxMainWindow::initMenuBar()
 
 void MxMainWindow::initMenus()
 {
+	// File menu
 	mFileMenu = menuBar()->addMenu(tr("&File"));
 	mNewAction = mFileMenu->addAction(tr("&New Project"));
 	mLoadAction = mFileMenu->addAction(tr("&Load Project"));
 	mSaveAction = mFileMenu->addAction(tr("&Save Project"));
 
+	// Edit menu
 	mEditMenu = menuBar()->addMenu(tr("&Edit"));
 	mAddShapeAction = mEditMenu->addAction(tr("&Add Shape"));
 	mDeleteShapeAction = mEditMenu->addAction(tr("&Delete Shape"));
 
+	// View menu
 	mViewMenu = menuBar()->addMenu(tr("&View"));
 	mToggleFullscreenAction = mViewMenu->addAction(tr("Toggle &Fullscreen"));
 	mToggleMarkersAction = mViewMenu->addAction(tr("Toggle &Markers"));
@@ -57,8 +61,8 @@ void MxMainWindow::initActions()
 	// Edit actions
 	mAddShapeAction->setShortcut(QKeySequence(tr("A", "Edit|Add Shape")));
 	mDeleteShapeAction->setShortcut(QKeySequence(tr("D", "Edit|Delete Shape")));
-	connect(mAddShapeAction, &QAction::triggered, this, &MxMainWindow::addShape);
-	connect(mDeleteShapeAction, &QAction::triggered, this, &MxMainWindow::deleteShape);
+	connect(mAddShapeAction, &QAction::triggered, mScene, &MxScene::addEmptyShape);
+	connect(mDeleteShapeAction, &QAction::triggered, mScene, &MxScene::deleteSelectedShapes);
 
 	// View actions
 	mToggleFullscreenAction->setShortcut(QKeySequence(tr("F11", "View|Toggle Fullscreen")));
@@ -93,16 +97,6 @@ void MxMainWindow::load()
 		}
 		mScene->load(fileNames[0]);
 	}
-}
-
-void MxMainWindow::addShape()
-{
-	mScene->addShape();
-}
-
-void MxMainWindow::deleteShape()
-{
-	mScene->deleteShape();
 }
 
 void MxMainWindow::toggleFullscreen()

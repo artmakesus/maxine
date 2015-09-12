@@ -26,7 +26,7 @@ MxSceneItem::MxSceneItem(QGraphicsItem *parent) :
 
 void MxSceneItem::init()
 {
-	mPointSelected = -1;
+	mSelectedVertex = -1;
 	mTexture = nullptr;
 
 	setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
@@ -42,12 +42,12 @@ void MxSceneItem::buildDefault()
 	          << QPointF(0, 400)
 	          << QPointF(0, 0);
 
-	mTexCoords << QPointF(0.5, 0.5)
-	           << QPointF(0, 1)
-	           << QPointF(1, 1)
-	           << QPointF(1, 0)
-	           << QPointF(0, 0)
-	           << QPointF(0, 1);
+	mTextureCoordinates << QPointF(0.5, 0.5)
+			    << QPointF(0, 1)
+			    << QPointF(1, 1)
+			    << QPointF(1, 0)
+			    << QPointF(0, 0)
+			    << QPointF(0, 1);
 }
 
 void MxSceneItem::setTextureFilePath(const QString &filepath)
@@ -60,9 +60,9 @@ void MxSceneItem::setVertices(const QPolygonF &vertices)
 	mVertices = vertices;
 }
 
-void MxSceneItem::setTexCoords(const QPolygonF &texCoords)
+void MxSceneItem::setTextureCoordinates(const QPolygonF &textureCoordinates)
 {
-	mTexCoords = texCoords;
+	mTextureCoordinates = textureCoordinates;
 }
 
 QPolygonF MxSceneItem::vertices() const
@@ -70,9 +70,9 @@ QPolygonF MxSceneItem::vertices() const
 	return mVertices;
 }
 
-QPolygonF MxSceneItem::texCoords() const
+QPolygonF MxSceneItem::textureCoordinates() const
 {
-	return mTexCoords;
+	return mTextureCoordinates;
 }
 
 QString MxSceneItem::textureFilePath() const
@@ -106,7 +106,7 @@ QRectF MxSceneItem::boundingRect() const
 
 void MxSceneItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-	if (hasTexture()) {
+	if (isTextureLoaded()) {
 		draw(painter);
 	} else {
 		drawWithoutTexture(painter);
@@ -136,13 +136,14 @@ void MxSceneItem::mousePressEvent(QGraphicsSceneMouseEvent *evt)
 {
 	auto mouse = evt->pos();
 
+	// Find which point of the item is selected
 	for (auto i = 0; i < mVertices.size(); i++) {
 		auto p = mVertices[i];
 		auto dx = p.x() - mouse.x();
 		auto dy = p.y() - mouse.y();
 		auto d = qSqrt(dx * dx + dy * dy);
 		if (d < 8) {
-			mPointSelected = i;
+			mSelectedVertex = i;
 			return;
 		}
 	}
@@ -152,25 +153,25 @@ void MxSceneItem::mousePressEvent(QGraphicsSceneMouseEvent *evt)
 
 void MxSceneItem::mouseMoveEvent(QGraphicsSceneMouseEvent *evt)
 {
-	if (mPointSelected == -1) {
+	// No vertex is selected so just let parent handle it
+	if (mSelectedVertex == -1) {
 		QAbstractGraphicsShapeItem::mouseMoveEvent(evt);
 		return;
 	}
 
+	// Move selected vertex
 	auto mouse = evt->pos();
-	mVertices[mPointSelected] = mouse;
-	if (mPointSelected == FirstPoint) {
+	mVertices[mSelectedVertex] = mouse;
+	if (mSelectedVertex == FirstPoint) {
 		mVertices[mVertices.size() - 1] = mouse;
 	}
-
-	emit invalidate();
 }
 
 void MxSceneItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *evt)
 {
 	QAbstractGraphicsShapeItem::mouseReleaseEvent(evt);
 
-	mPointSelected = -1;
+	deselectVertex();
 }
 
 void MxSceneItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *evt)
@@ -213,10 +214,10 @@ void MxSceneItem::draw(QPainter *painter)
 
 	mTexture->bind();
 
-	// FIXME: using deprecated OpenGL API
+	// FIXME: Using deprecated OpenGL API
 	glBegin(GL_POLYGON);
 	for (auto i = 0; i < mVertices.size(); i++) {
-		glTexCoord2f(mTexCoords[i].x(), mTexCoords[i].y());
+		glTexCoord2f(mTextureCoordinates[i].x(), mTextureCoordinates[i].y());
 		glVertex2f(mVertices[i].x(), mVertices[i].y());
 	}
 	glEnd();
@@ -236,7 +237,7 @@ void MxSceneItem::drawMarkers(QPainter *painter)
 	}
 }
 
-bool MxSceneItem::hasTexture() const
+bool MxSceneItem::isTextureLoaded() const
 {
 	return mTexture;
 }
@@ -249,7 +250,7 @@ bool MxSceneItem::isMarkersShown() const
 
 bool MxSceneItem::shouldLoadTexture() const
 {
-	return !mTexture && !mTextureFilePath.isEmpty();
+	return !isTextureLoaded() && !mTextureFilePath.isEmpty();
 }
 
 void MxSceneItem::addPoint(float x, float y)
@@ -281,7 +282,7 @@ void MxSceneItem::addPoint(float x, float y)
 
 	auto i = (shortest + 1) % mVertices.size();
 
-	// skip center point
+	// Skip center point
 	if (i == CenterPoint) {
 		i = FirstPoint;
 	}
@@ -292,11 +293,11 @@ void MxSceneItem::addPoint(float x, float y)
 		mVertices[mVertices.size() - 1] = p;
 	}
 
-	// add texture coordinate
-	auto tc = texCoordBetween(shortest, shortest + 1);
-	mTexCoords.insert(i, tc);
+	// Add texture coordinate
+	auto tc = textureCoordinateBetween(shortest, shortest + 1);
+	mTextureCoordinates.insert(i, tc);
 	if (i == FirstPoint) {
-		mTexCoords[mTexCoords.size() - 1] = tc;
+		mTextureCoordinates[mTextureCoordinates.size() - 1] = tc;
 	}
 }
 
@@ -305,7 +306,8 @@ void MxSceneItem::removePoint(float x, float y)
 	float shortestDistance = 9999;
 	int shortest = -1;
 
-	for (auto i = 1; i <= mVertices.size(); i++) {
+	// Find the closest vertex
+	for (auto i = FirstPoint; i <= mVertices.size(); i++) {
 		auto avgDistance = MxPoint::distance(QPointF(x, y), mVertices[i]);
 		if (avgDistance < shortestDistance) {
 			shortestDistance = avgDistance;
@@ -313,36 +315,40 @@ void MxSceneItem::removePoint(float x, float y)
 		}
 	}
 
+	// Didn't find any closest vertex
 	if (shortest < 0 && shortestDistance >= 9999) {
 		return;
 	}
 
-	// add vertex
+	// Found shortest vertex
 	auto i = shortest;
 
-	// skip center point
-	if (i == CenterPoint) {
-		i = FirstPoint;
-	}
-
+	// Remove the vertex
 	mVertices.remove(i);
+
+	// If removed vertex was the first vertex, assign the current first vertex to the last vertex
 	if (i == FirstPoint) {
 		mVertices[mVertices.size() - 1] = mVertices[FirstPoint];
 	}
 
-	// add texture coordinate
-	mTexCoords.remove(i);
+	// If removed vertex was the first vertex, assign the current first texture coordinate to the last texture coordinate
+	mTextureCoordinates.remove(i);
 	if (i == FirstPoint) {
-		mTexCoords[mTexCoords.size() - 1] = mTexCoords[FirstPoint];
+		mTextureCoordinates[mTextureCoordinates.size() - 1] = mTextureCoordinates[FirstPoint];
 	}
 }
 
-QPointF MxSceneItem::texCoordBetween(int a, int b)
+void MxSceneItem::deselectVertex()
 {
-	auto ta = mTexCoords[a];
-	auto tb = mTexCoords[b];
+	mSelectedVertex = -1;
+}
 
-	if (mTexCoords.size() > 5) {
+QPointF MxSceneItem::textureCoordinateBetween(int a, int b)
+{
+	auto ta = mTextureCoordinates[a];
+	auto tb = mTextureCoordinates[b];
+
+	if (mTextureCoordinates.size() > 5) {
 		auto tc = ta + ((tb - ta) / 2);
 		return tc;
 	}
@@ -354,6 +360,7 @@ QPointF MxSceneItem::texCoordBetween(int a, int b)
 	} else if (ta.x() == 1 && ta.y() == 0) {
 		return QPointF(0, 0);
 	}
+
 	return QPointF(0, 1);
 }
 
@@ -375,7 +382,7 @@ QOpenGLWidget *MxSceneItem::openGLWidget()
 
 QDataStream & operator<<(QDataStream &out, MxSceneItem *item)
 {
-	// save texture
+	// Save texture
 	auto media = item->textureFilePath();
 	auto hasMedia = !media.isEmpty();
 	out << hasMedia;
@@ -383,24 +390,24 @@ QDataStream & operator<<(QDataStream &out, MxSceneItem *item)
 		out << media;
 	}
 
-	// save position
+	// Save position
 	auto p = item->pos();
 	out << p.x() << p.y();
 
-	// save vertices count
+	// Save vertices count
 	auto vs = item->vertices();
 	out << (qint64) vs.size();
 
-	// save vertices
+	// Save vertices
 	foreach (auto v, vs) {
 		out << v.x() << v.y();
 	}
 
-	// save texture coordinates count
-	auto tcs = item->texCoords();
+	// Save texture coordinates count
+	auto tcs = item->textureCoordinates();
 	out << (qint64) tcs.size();
 
-	// save texture coordinates
+	// Save texture coordinates
 	foreach (auto tc, tcs) {
 		out << tc.x() << tc.y();
 	}
@@ -410,7 +417,7 @@ QDataStream & operator<<(QDataStream &out, MxSceneItem *item)
 
 QDataStream & operator>>(QDataStream &in, MxSceneItem *item)
 {
-	// load texture
+	// Load texture
 	QString textureFilePath;
 	bool hasTexture = false;
 	in >> hasTexture;
@@ -419,13 +426,13 @@ QDataStream & operator>>(QDataStream &in, MxSceneItem *item)
 	}
 	item->setTextureFilePath(textureFilePath);
 
-	// load position
+	// Load position
 	float x, y;
 	in >> x >> y;
 	QPointF pos(x, y);
 	item->setPos(pos);
 
-	// load vertices
+	// Load vertices
 	QPolygonF vertices;
 	qint64 numVertices = 0;
 	in >> numVertices;
@@ -435,15 +442,15 @@ QDataStream & operator>>(QDataStream &in, MxSceneItem *item)
 	}
 	item->setVertices(vertices);
 
-	// load texture coordinates
-	QPolygonF texCoords;
-	qint64 numTexCoords = 0;
-	in >> numTexCoords;
-	for (qint64 i = 0; i < numTexCoords; i++) {
+	// Load texture coordinates
+	QPolygonF textureCoordinates;
+	qint64 numTexturesCoordinates = 0;
+	in >> numTexturesCoordinates;
+	for (qint64 i = 0; i < numTexturesCoordinates; i++) {
 		in >> x >> y;
-		texCoords << QPointF(x, y);
+		textureCoordinates << QPointF(x, y);
 	}
-	item->setTexCoords(texCoords);
+	item->setTextureCoordinates(textureCoordinates);
 
 	return in;
 }

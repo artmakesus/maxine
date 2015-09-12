@@ -18,6 +18,7 @@ MxScene::MxScene(QObject *parent) :
 
 void MxScene::new_()
 {
+	// Clear all the items from the scene
 	clear();
 }
 
@@ -28,7 +29,7 @@ void MxScene::save(const QString &filename)
 		return;
 	}
 
-	// save file format keyword
+	// Save file format keyword
 	QDataStream out(&file);
 	const char keyword[] = "maxine";
 	out.writeRawData(keyword, 7);
@@ -39,20 +40,22 @@ void MxScene::save(const QString &filename)
 
 void MxScene::load(const QString &filename)
 {
+	// Clear all the items from the scene
 	clear();
 
+	// Open file
 	QFile file(filename);
 	if (!file.open(QIODevice::ReadOnly)) {
 		return;
 	}
-
 	QDataStream in(&file);
 
-	// load file format keyword
+	// Load file format keyword
 	char *keyword = new char[7];
 	uint length = 7;
 	in.readRawData(keyword, length);
 
+	// Check if the keyword is "maxine"
 	if (strcmp(keyword, "maxine") != 0) {
 		fprintf(stderr, "Not a Maxine file!\n");
 		delete keyword;
@@ -60,6 +63,7 @@ void MxScene::load(const QString &filename)
 	}
 	delete keyword;
 
+	// Load shapes to the scene
 	in >> this;
 }
 
@@ -71,8 +75,10 @@ bool MxScene::isMarkersShown()
 bool MxScene::createSharedTexture(const QString &key, int index, int width, int height) const
 {
 	auto list = items();
+
+	// Check if index is valid
 	if (list.size() <= index) {
-		return "";
+		return false;
 	}
 
 	auto item = static_cast<MxSceneItem*>(list[index]);
@@ -82,8 +88,10 @@ bool MxScene::createSharedTexture(const QString &key, int index, int width, int 
 bool MxScene::invalidateSharedTexture(int index) const
 {
 	auto list = items();
+
+	// Check if index is valid
 	if (list.size() <= index) {
-		return "";
+		return false;
 	}
 
 	auto item = static_cast<MxSceneItem*>(list[index]);
@@ -92,21 +100,20 @@ bool MxScene::invalidateSharedTexture(int index) const
 
 void MxScene::addShape(MxSceneItem *shape)
 {
-	if (!shape) {
-		shape = new MxSceneItem;
-		shape->buildDefault();
-	}
-
 	connect(shape, &MxSceneItem::invalidate,this, &MxScene::invalidate);
 	addItem(shape);
 }
 
-void MxScene::deleteShape(MxSceneItem *shape)
+void MxScene::addEmptyShape()
 {
-	auto items = selectedItems();
-	foreach (auto item, items) {
-		removeItem(item);
-	}
+	auto shape = new MxSceneItem;
+	shape->buildDefault();
+	addShape(shape);
+}
+
+void MxScene::deleteSelectedShapes()
+{
+	// TODO: Implement deleteSelectedShape
 }
 
 void MxScene::toggleMarkers()
@@ -122,15 +129,15 @@ void MxScene::invalidate(const QRectF & rect, QGraphicsScene::SceneLayers layers
 
 QDataStream & operator<<(QDataStream &out, const MxScene *scene)
 {
-	// save scene resolution
+	// Save scene resolution
 	auto rect = scene->sceneRect();
 	out << rect.x() << rect.y() << rect.width() << rect.height();
 
-	// save shapes count
+	// Save shapes count
 	auto shapes = scene->items();
 	out << (qint64) shapes.size();
 
-	// save shapes
+	// Save shapes
 	foreach (auto s, shapes) {
 		out << static_cast<MxSceneItem*>(s);
 	}
@@ -140,16 +147,16 @@ QDataStream & operator<<(QDataStream &out, const MxScene *scene)
 
 QDataStream & operator>>(QDataStream &in, MxScene *scene)
 {
-	// load scene resolution
+	// Load scene resolution
 	float x, y, width, height;
 	in >> x >> y >> width >> height;
 	scene->setSceneRect(x, y, width, height);
 
-	// load shapes count
+	// Load shapes count
 	qint64 numShapes = 0;
 	in >> numShapes;
 
-	// load shapes
+	// Load shapes
 	for (qint64 i = 0; i < numShapes; i++) {
 		auto item = new MxSceneItem; 
 		in >> item;

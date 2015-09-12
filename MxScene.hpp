@@ -15,16 +15,29 @@ public:
 	void new_();
 	void save(const QString &filename);
 	void load(const QString &filename);
+	
+	void addShape(MxSceneItem *shape);
 
+	// Are the shapes' outlines and points shown?
 	bool isMarkersShown();
+
+	// Creates shared texture of an item for image manipulations by other programs through DBus
 	bool createSharedTexture(const QString &key, int index, int width, int height) const;
+
+	// Invalidates the shared texture of an item
 	bool invalidateSharedTexture(int index) const;
 
 public slots:
-	void addShape(MxSceneItem *shape = 0);
-	void deleteShape(MxSceneItem *shape = 0);
+	// Add empty shape
+	void addEmptyShape();
+
+	// Delete selected shapes
+	void deleteSelectedShapes();
+
+	// Toggle markers off / on
 	void toggleMarkers();
 
+	// Invalidate texture to update its display
 	void invalidate(const QRectF & rect = QRectF(), QGraphicsScene::SceneLayers layers = QGraphicsScene::AllLayers);
 
 private:

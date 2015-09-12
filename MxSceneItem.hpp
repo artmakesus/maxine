@@ -20,19 +20,30 @@ class MxSceneItem : public QObject, public QAbstractGraphicsShapeItem {
 public:
 	MxSceneItem(QGraphicsItem *parent = 0);
 	void init();
+
+	// Add default vertices and texture coordinates
 	void buildDefault();
 
+	// Set file path for texture that will be loaded at later time
 	void setTextureFilePath(const QString &filepath);
-	void setVertices(const QPolygonF &vertices);
-	void setTexCoords(const QPolygonF &texCoords);
-	QPolygonF vertices() const;
-	QPolygonF texCoords() const;
-	QString textureFilePath() const;
 
+	// Set vertices
+	void setVertices(const QPolygonF &vertices);
+
+	// Set texture coordinates
+	void setTextureCoordinates(const QPolygonF &textureCoordinates);
+
+	// Creates shared texture for image manipulations by other programs through DBus
 	bool createSharedTexture(const QString &key, int width, int height);
+
+	// Invalidates the shared texture
 	bool invalidateSharedTexture();
 
+	QPolygonF vertices() const;
+	QPolygonF textureCoordinates() const;
+	QString textureFilePath() const;
 	QRectF boundingRect() const;
+
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
 
 signals:
@@ -55,23 +66,37 @@ private:
 	static const int FirstPoint;
 
 	QPolygonF  mVertices;
-	QPolygonF  mTexCoords;
-	MxTexture *mTexture;
+	QPolygonF  mTextureCoordinates;
 	QString    mTextureFilePath;
-	int	   mPointSelected;
+	MxTexture *mTexture;
+	int	   mSelectedVertex;
 
 	void drawWithoutTexture(QPainter *painter);
 	void draw(QPainter *painter);
 	void drawMarkers(QPainter *painter);
 
-	bool hasTexture() const;
+	// Is texture loaded?
+	bool isTextureLoaded() const;
+
+	// Are the shape's outlines and points shown?
 	bool isMarkersShown() const;
+
+	// Is texture not loaded and texture file path
 	bool shouldLoadTexture() const;
 
+	// Add a point on the shape
 	void addPoint(float x, float y);
-	void removePoint(float x, float y);
-	QPointF texCoordBetween(int a, int b);
 
+	// Remove a point from the shape
+	void removePoint(float x, float y);
+
+	// Deselect currently selected vertex
+	void deselectVertex();
+
+	// Calculate texture coordinate between index A and B
+	QPointF textureCoordinateBetween(int a, int b);
+
+	// Get OpenGL Widget of the current QGraphicsView
 	QOpenGLWidget * openGLWidget();
 };
 

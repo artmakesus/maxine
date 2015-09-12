@@ -66,6 +66,14 @@ MxTexture::MxTexture(QOpenGLWidget *widget, const QString &filePath, QObject *pa
 
 MxTexture::~MxTexture()
 {
+	if (mVideoPlayer) {
+		delete mVideoPlayer;
+	}
+
+	if (mVideoSurface) {
+		delete mVideoSurface;
+	}
+
 	if (!(mOpenGLWidget && mOpenGLTexture)) {
 		return;
 	}
