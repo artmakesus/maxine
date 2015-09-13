@@ -113,7 +113,10 @@ void MxScene::addEmptyShape()
 
 void MxScene::deleteSelectedShapes()
 {
-	// TODO: Implement deleteSelectedShape
+	auto items = selectedItems();
+	for (auto item : items) {
+		removeItem(item);
+	}
 }
 
 void MxScene::toggleMarkers()
