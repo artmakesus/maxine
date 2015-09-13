@@ -24,6 +24,11 @@ MxSceneItem::MxSceneItem(QGraphicsItem *parent) :
 	init();
 }
 
+MxSceneItem::~MxSceneItem()
+{
+	delete mTexture;
+}
+
 void MxSceneItem::init()
 {
 	mSelectedVertex = -1;
@@ -123,6 +128,10 @@ void MxSceneItem::dropEvent(QGraphicsSceneDragDropEvent *evt)
 
 	if (mimeData->hasUrls()) {
 		foreach (QUrl url, evt->mimeData()->urls()) {
+			if (mTexture) {
+				delete mTexture;
+			}
+
 			mTextureFilePath = url.path().toUtf8();
 			mTexture = new MxTexture(openGLWidget(), mTextureFilePath);
 			connect(mTexture, &MxTexture::invalidate, this, &MxSceneItem::invalidate);

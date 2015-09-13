@@ -7,13 +7,15 @@ MxVideoSurface::MxVideoSurface(QObject *parent) :
 
 bool MxVideoSurface::present(const QVideoFrame &frame)
 {
-	auto dup = frame;
+	if (frame.isValid()) {
+		auto dup = frame;
+		dup.map(QAbstractVideoBuffer::ReadOnly);
+		emit onVideoFrame(dup);
+		dup.unmap();
+		return true;
+	}
 
-	dup.map(QAbstractVideoBuffer::ReadOnly);
-
-	emit onVideoFrame(dup);
-
-	return true;
+	return false;
 }
 
 QList<QVideoFrame::PixelFormat> MxVideoSurface::supportedPixelFormats(QAbstractVideoBuffer::HandleType type) const

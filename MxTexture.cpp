@@ -175,9 +175,11 @@ void MxTexture::onVideoFrame(const QVideoFrame &frame)
 	mOpenGLWidget->makeCurrent();
 	
 	if (mOpenGLTexture && mOpenGLTexture->isCreated()) {
+		// OpenGL Texture is already created
 		QImage image(frame.bits(), frame.width(), frame.height(), QImage::Format_Grayscale8);
 		mOpenGLTexture->setData(image.mirrored());
 	} else {
+		// OpenGL Texture hasn't been created
 		QImage image(frame.bits(), frame.width(), frame.height(), QImage::Format_Grayscale8);
 		mOpenGLTexture = new QOpenGLTexture(image.mirrored());
 		mOpenGLTexture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
