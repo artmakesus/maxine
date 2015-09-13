@@ -5,6 +5,7 @@
 
 class MxScene;
 class QGraphicsView;
+class QShortcut;
 
 class MxMainWindow : public QMainWindow {
 public:
@@ -27,9 +28,19 @@ private:
 	QAction *mToggleMarkersAction;
 	QAction *mToggleScrollBarAction;
 
+	QShortcut *mNewShortcut;
+	QShortcut *mLoadShortcut;
+	QShortcut *mSaveShortcut;
+	QShortcut *mAddShapeShortcut;
+	QShortcut *mDeleteShapeShortcut;
+	QShortcut *mToggleFullscreenShortcut;
+	QShortcut *mToggleMarkersShortcut;
+	QShortcut *mToggleScrollBarShortcut;
+
 	void initMenuBar();
 	void initMenus();
 	void initActions();
+	void initShortcuts();
 
 private slots:
 	void new_();

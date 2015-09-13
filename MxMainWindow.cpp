@@ -23,6 +23,7 @@ MxMainWindow::MxMainWindow(QWidget *parent, Qt::WindowFlags f) :
 	initMenuBar();
 	initMenus();
 	initActions();
+	initShortcuts();
 
 	setCentralWidget(mGraphicsView);
 }
@@ -55,26 +56,43 @@ void MxMainWindow::initMenus()
 void MxMainWindow::initActions()
 {
 	// File actions
-	mNewAction->setShortcut(QKeySequence(tr("Ctrl+N", "File|New Project")));
-	mLoadAction->setShortcut(QKeySequence(tr("Ctrl+L", "File|Load Project")));
-	mSaveAction->setShortcut(QKeySequence(tr("Ctrl+S", "File|Save Project")));
 	connect(mNewAction, &QAction::triggered, this, &MxMainWindow::new_);
 	connect(mLoadAction, &QAction::triggered, this, &MxMainWindow::load);
 	connect(mSaveAction, &QAction::triggered, this, &MxMainWindow::save);
 
 	// Edit actions
-	mAddShapeAction->setShortcut(QKeySequence(tr("N", "Edit|Add Shape")));
-	mDeleteShapeAction->setShortcut(QKeySequence(tr("Backspace", "Edit|Delete Shape")));
 	connect(mAddShapeAction, &QAction::triggered, mScene, &MxScene::addEmptyShape);
 	connect(mDeleteShapeAction, &QAction::triggered, mScene, &MxScene::deleteSelectedShapes);
 
 	// View actions
-	mToggleFullscreenAction->setShortcut(QKeySequence(tr("F11", "View|Toggle Fullscreen")));
-	mToggleMarkersAction->setShortcut(QKeySequence(tr("M", "View|Toggle Markers")));
-	mToggleScrollBarAction->setShortcut(QKeySequence(tr("F12", "View|Toggle Scroll Bar")));
 	connect(mToggleFullscreenAction, &QAction::triggered, this, &MxMainWindow::toggleFullscreen);
 	connect(mToggleMarkersAction, &QAction::triggered, mScene, &MxScene::toggleMarkers);
 	connect(mToggleScrollBarAction, &QAction::triggered, this, &MxMainWindow::toggleScrollBar);
+}
+
+void MxMainWindow::initShortcuts()
+{
+	// File shortcuts
+	mNewShortcut = new QShortcut(QKeySequence(tr("Ctrl+N", "File|New Project")), this);
+	mLoadShortcut = new QShortcut(QKeySequence(tr("Ctrl+L", "File|Load Project")), this);
+	mSaveShortcut = new QShortcut(QKeySequence(tr("Ctrl+S", "File|Save Project")), this);
+	connect(mNewShortcut, &QShortcut::activated, this, &MxMainWindow::new_);
+	connect(mLoadShortcut, &QShortcut::activated, this, &MxMainWindow::load);
+	connect(mSaveShortcut, &QShortcut::activated, this, &MxMainWindow::save);
+
+	// Edit shortcuts
+	mAddShapeShortcut = new QShortcut(QKeySequence(tr("N", "Edit|Add Shape")), this);
+	mDeleteShapeShortcut = new QShortcut(QKeySequence(tr("Backspace", "Edit|Delete Shape")), this);
+	connect(mAddShapeShortcut, &QShortcut::activated, mScene, &MxScene::addEmptyShape);
+	connect(mDeleteShapeShortcut, &QShortcut::activated, mScene, &MxScene::deleteSelectedShapes);
+
+	// View shortcuts
+	mToggleFullscreenShortcut = new QShortcut(QKeySequence(tr("F11", "View|Toggle Fullscreen")), this);
+	mToggleMarkersShortcut = new QShortcut(QKeySequence(tr("M", "View|Toggle Markers")), this);
+	mToggleScrollBarShortcut = new QShortcut(QKeySequence(tr("F12", "View|Toggle Scroll Bar")), this);
+	connect(mToggleFullscreenShortcut, &QShortcut::activated, this, &MxMainWindow::toggleFullscreen);
+	connect(mToggleMarkersShortcut, &QShortcut::activated, mScene, &MxScene::toggleMarkers);
+	connect(mToggleScrollBarShortcut, &QShortcut::activated, this, &MxMainWindow::toggleScrollBar);
 }
 
 void MxMainWindow::new_()
