@@ -116,6 +116,7 @@ void MxScene::deleteSelectedShapes()
 	auto items = selectedItems();
 	for (auto item : items) {
 		removeItem(item);
+		delete item;
 	}
 }
 

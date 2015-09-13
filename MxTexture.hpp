@@ -3,9 +3,9 @@
 
 #include <QGraphicsScene>
 #include <QVideoFrame>
+#include <QMediaPlayer>
 
 class MxVideoSurface;
-class QMediaPlayer;
 class QOpenGLWidget;
 class QOpenGLTexture;
 class QPixmap;
@@ -71,6 +71,9 @@ private:
 private slots:
 	// Called when player is playing a video frame
 	void onVideoFrame(const QVideoFrame &frame);
+
+	// Called when player encounters an error
+	void onMediaPlayerError(QMediaPlayer::Error error);
 };
 
 #endif

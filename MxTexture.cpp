@@ -4,7 +4,6 @@
 #include <QDebug>
 #include <QImage>
 #include <QMediaPlaylist>
-#include <QMediaPlayer>
 #include <QOpenGLWidget>
 #include <QOpenGLTexture>
 #include <QSharedMemory>
@@ -68,10 +67,6 @@ MxTexture::~MxTexture()
 {
 	if (mVideoPlayer) {
 		delete mVideoPlayer;
-	}
-
-	if (mVideoSurface) {
-		delete mVideoSurface;
 	}
 
 	if (!(mOpenGLWidget && mOpenGLTexture)) {
@@ -146,6 +141,7 @@ void MxTexture::loadVideo(const QString &filePath)
 	mVideoPlayer->setVideoOutput(mVideoSurface);
 
 	connect(mVideoSurface, &MxVideoSurface::onVideoFrame, this, &MxTexture::onVideoFrame);
+	connect(mVideoPlayer, SIGNAL(error(QMediaPlayer::Error)), this, SLOT(onMediaPlayerError(QMediaPlayer::Error)));
 
 	mVideoPlayer->play();
 }
@@ -191,4 +187,15 @@ void MxTexture::onVideoFrame(const QVideoFrame &frame)
 	mOpenGLWidget->doneCurrent();
 
 	emit invalidate();
+}
+
+void MxTexture::onMediaPlayerError(QMediaPlayer::Error error)
+{
+	if (mVideoPlayer->state() == QMediaPlayer::PlayingState) {
+		mVideoPlayer->stop();
+	}
+
+	delete mOpenGLTexture;
+	// FIXME: deleting mVideoPlayer somehow crashes the program
+	// delete mVideoPlayer;
 }

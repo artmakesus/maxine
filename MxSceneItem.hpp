@@ -19,6 +19,7 @@ class MxSceneItem : public QObject, public QAbstractGraphicsShapeItem {
 	Q_OBJECT
 public:
 	MxSceneItem(QGraphicsItem *parent = 0);
+
 	void init();
 
 	// Add default vertices and texture coordinates
