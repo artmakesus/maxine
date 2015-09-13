@@ -61,8 +61,8 @@ void MxMainWindow::initActions()
 	connect(mSaveAction, &QAction::triggered, this, &MxMainWindow::save);
 
 	// Edit actions
-	mAddShapeAction->setShortcut(QKeySequence(tr("A", "Edit|Add Shape")));
-	mDeleteShapeAction->setShortcut(QKeySequence(tr("D", "Edit|Delete Shape")));
+	mAddShapeAction->setShortcut(QKeySequence(tr("N", "Edit|Add Shape")));
+	mDeleteShapeAction->setShortcut(QKeySequence(tr("Backspace", "Edit|Delete Shape")));
 	connect(mAddShapeAction, &QAction::triggered, mScene, &MxScene::addEmptyShape);
 	connect(mDeleteShapeAction, &QAction::triggered, mScene, &MxScene::deleteSelectedShapes);
 
