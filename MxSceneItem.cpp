@@ -165,6 +165,8 @@ void MxSceneItem::mouseMoveEvent(QGraphicsSceneMouseEvent *evt)
 	if (mSelectedVertex == FirstPoint) {
 		mVertices[mVertices.size() - 1] = mouse;
 	}
+
+	emit invalidate();
 }
 
 void MxSceneItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *evt)
