@@ -113,7 +113,7 @@ QRectF MxSceneItem::boundingRect() const
 
 void MxSceneItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-	if (isTextureLoaded()) {
+	if (shouldLoadTexture() || isTextureLoaded()) {
 		draw(painter);
 	} else {
 		drawWithoutTexture(painter);
