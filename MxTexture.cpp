@@ -25,7 +25,8 @@ QStringList MxTexture::VIDEO_SUFFIXES =
 MxTexture::MxTexture(QOpenGLWidget *widget, const QString &key, int width, int height, QObject *parent) :
 	QObject(parent),
 	mOpenGLWidget(widget),
-	mOpenGLTexture(nullptr)
+	mOpenGLTexture(nullptr),
+	mVideoPlayer(nullptr)
 {
 	if (!mOpenGLWidget) {
 		fprintf(stderr, "MxTexture: empty OpenGL widget\n");
@@ -45,7 +46,8 @@ MxTexture::MxTexture(QOpenGLWidget *widget, const QString &key, int width, int h
 MxTexture::MxTexture(QOpenGLWidget *widget, const QString &filePath, QObject *parent) :
 	QObject(parent),
 	mOpenGLWidget(widget),
-	mOpenGLTexture(nullptr)
+	mOpenGLTexture(nullptr),
+	mVideoPlayer(nullptr)
 {
 	if (!mOpenGLWidget) {
 		fprintf(stderr, "MxTexture: empty OpenGL widget\n");
@@ -69,7 +71,7 @@ MxTexture::~MxTexture()
 		delete mVideoPlayer;
 	}
 
-	if (!(mOpenGLWidget && mOpenGLTexture)) {
+	if (!mOpenGLTexture) {
 		return;
 	}
 

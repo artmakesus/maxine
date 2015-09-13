@@ -26,7 +26,9 @@ MxSceneItem::MxSceneItem(QGraphicsItem *parent) :
 
 MxSceneItem::~MxSceneItem()
 {
-	delete mTexture;
+	if (mTexture) {
+		delete mTexture;
+	}
 }
 
 void MxSceneItem::init()
