@@ -42,13 +42,14 @@ void MxMainWindow::initMenus()
 
 	// Edit menu
 	mEditMenu = menuBar()->addMenu(tr("&Edit"));
-	mAddShapeAction = mEditMenu->addAction(tr("&Add Shape"));
-	mDeleteShapeAction = mEditMenu->addAction(tr("&Delete Shape"));
+	mAddShapeAction = mEditMenu->addAction(tr("Add Shape"));
+	mDeleteShapeAction = mEditMenu->addAction(tr("Delete Shape"));
 
 	// View menu
 	mViewMenu = menuBar()->addMenu(tr("&View"));
-	mToggleFullscreenAction = mViewMenu->addAction(tr("Toggle &Fullscreen"));
-	mToggleMarkersAction = mViewMenu->addAction(tr("Toggle &Markers"));
+	mToggleFullscreenAction = mViewMenu->addAction(tr("Toggle Fullscreen"));
+	mToggleMarkersAction = mViewMenu->addAction(tr("Toggle Markers"));
+	mToggleScrollBarAction = mViewMenu->addAction(tr("Toggle ScrollBar"));
 }
 
 void MxMainWindow::initActions()
@@ -70,8 +71,10 @@ void MxMainWindow::initActions()
 	// View actions
 	mToggleFullscreenAction->setShortcut(QKeySequence(tr("F11", "View|Toggle Fullscreen")));
 	mToggleMarkersAction->setShortcut(QKeySequence(tr("M", "View|Toggle Markers")));
+	mToggleScrollBarAction->setShortcut(QKeySequence(tr("F12", "View|Toggle Scroll Bar")));
 	connect(mToggleFullscreenAction, &QAction::triggered, this, &MxMainWindow::toggleFullscreen);
 	connect(mToggleMarkersAction, &QAction::triggered, mScene, &MxScene::toggleMarkers);
+	connect(mToggleScrollBarAction, &QAction::triggered, this, &MxMainWindow::toggleScrollBar);
 }
 
 void MxMainWindow::new_()
@@ -110,5 +113,16 @@ void MxMainWindow::toggleFullscreen()
 	} else {
 		showFullScreen();
 		menuBar()->setVisible(false);
+	}
+}
+
+void MxMainWindow::toggleScrollBar()
+{
+	if (mGraphicsView->verticalScrollBarPolicy() != Qt::ScrollBarAlwaysOff) {
+		mGraphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+		mGraphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	} else {
+		mGraphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+		mGraphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 	}
 }

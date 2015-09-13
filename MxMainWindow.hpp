@@ -25,6 +25,7 @@ private:
 	QAction *mDeleteShapeAction;
 	QAction *mToggleFullscreenAction;
 	QAction *mToggleMarkersAction;
+	QAction *mToggleScrollBarAction;
 
 	void initMenuBar();
 	void initMenus();
@@ -35,6 +36,7 @@ private slots:
 	void save();
 	void load();
 	void toggleFullscreen();
+	void toggleScrollBar();
 };
 
 #endif
