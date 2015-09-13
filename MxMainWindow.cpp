@@ -10,16 +10,18 @@
 MxMainWindow::MxMainWindow(QWidget *parent, Qt::WindowFlags f) :
 	QMainWindow(parent, f)
 {
-	// Setup Window
+	// Set window title
 	setWindowTitle(tr("Maxine"));
-	initMenuBar();
-	initMenus();
-	initActions();
 
 	// Setup Scene
 	mScene = new MxScene;
 	mGraphicsView = new QGraphicsView(mScene);
 	mGraphicsView->setViewport(new MxOpenGLWidget);
+
+	// Setup the rest of the window
+	initMenuBar();
+	initMenus();
+	initActions();
 
 	setCentralWidget(mGraphicsView);
 }
