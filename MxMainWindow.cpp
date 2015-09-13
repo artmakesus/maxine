@@ -106,7 +106,9 @@ void MxMainWindow::toggleFullscreen()
 {
 	if (isFullScreen()) {
 		showNormal();
+		menuBar()->setVisible(true);
 	} else {
 		showFullScreen();
+		menuBar()->setVisible(false);
 	}
 }
