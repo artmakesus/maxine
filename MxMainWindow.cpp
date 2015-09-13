@@ -17,6 +17,7 @@ MxMainWindow::MxMainWindow(QWidget *parent, Qt::WindowFlags f) :
 	mScene = new MxScene;
 	mGraphicsView = new QGraphicsView(mScene);
 	mGraphicsView->setViewport(new MxOpenGLWidget);
+	mGraphicsView->setFrameShape(QFrame::NoFrame);
 
 	// Setup the rest of the window
 	initMenuBar();
