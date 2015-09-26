@@ -8,7 +8,7 @@ INCLUDEPATH += .
 
 QT += core widgets multimedia multimediawidgets webkitwidgets dbus
 
-QMAKE_CXX = clang++
+QMAKE_CXX = g++
 QMAKE_CXXFLAGS += -std=c++11
 LIBS +=
 
