@@ -8,7 +8,7 @@ MxWebView::MxWebView(QWidget *parent) :
     QWebView(parent)
 {
     mTimer = new QTimer(this);
-    mTimer->setInterval(16);
+    mTimer->setInterval(33);
     connect(mTimer, &QTimer::timeout, this, &MxWebView::onPaint);
     mTimer->start();
 }

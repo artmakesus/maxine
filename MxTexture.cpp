@@ -8,6 +8,7 @@
 #include <QOpenGLTexture>
 #include <QSharedMemory>
 #include <QWebFrame>
+#include <QWebElement>
 
 QStringList MxTexture::IMAGE_SUFFIXES =
 		QStringList() << "jpg"
@@ -44,7 +45,8 @@ MxTexture::MxTexture(QOpenGLWidget *widget, const QString &key, int width, int h
 MxTexture::MxTexture(QOpenGLWidget *widget, const QString &filePath, QObject *parent) :
 	QObject(parent),
 	mOpenGLWidget(widget),
-	mOpenGLTexture(nullptr)
+	mOpenGLTexture(nullptr),
+	mWebView(nullptr)
 {
 	if (!mOpenGLWidget) {
 		fprintf(stderr, "MxTexture: empty OpenGL widget\n");
@@ -116,11 +118,17 @@ void MxTexture::prepareWebView()
 
 void MxTexture::onFrame()
 {
-	auto size = mWebView->page()->mainFrame()->contentsSize();
+	auto page = mWebView->page();
+	auto elem = page->mainFrame()->findFirstElement("video, img");
+	auto size = elem.geometry().size();
 	QImage image(size, QImage::Format_ARGB32);
+	if (image.isNull()) {
+		return;
+	}
+
 	QPainter painter(&image);
-	mWebView->page()->setViewportSize(size);
-	mWebView->page()->mainFrame()->render(&painter);
+	page->setViewportSize(size);
+	elem.render(&painter);
 
 	mOpenGLWidget->makeCurrent();
 	if (mOpenGLTexture) {
@@ -137,14 +145,14 @@ void MxTexture::onFrame()
 void MxTexture::loadImage(const QString &filePath)
 {
 	prepareWebView();
-	mWebView->setHtml("<html><head><style>*{margin: 0}</style></head><body><img src='file://" + filePath + "' /></body></html>");
+	mWebView->setHtml("<html><body><img src='file://" + filePath + "' /></body></html>");
 	connect(mWebView, &MxWebView::onPaint, this, &MxTexture::onFrame);
 }
 
 void MxTexture::loadVideo(const QString &filePath)
 {
 	prepareWebView();
-	mWebView->setHtml("<html><head><style>*{margin: 0}</style></head><body><video src='file://" + filePath + "' autoplay loop></video></body></html>");
+	mWebView->setHtml("<html><body><video src='file://" + filePath + "' autoplay loop></video></body></html>");
 	connect(mWebView, &MxWebView::onPaint, this, &MxTexture::onFrame);
 }
 
