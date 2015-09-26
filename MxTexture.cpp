@@ -60,13 +60,15 @@ MxTexture::MxTexture(QOpenGLWidget *widget, const QString &filePath, QObject *pa
 
 MxTexture::~MxTexture()
 {
-	if (!mOpenGLTexture) {
-		return;
+	if (mOpenGLTexture) {
+		mOpenGLWidget->makeCurrent();
+		delete mOpenGLTexture;
+		mOpenGLWidget->doneCurrent();
 	}
 
-	mOpenGLWidget->makeCurrent();
-	delete mOpenGLTexture;
-	mOpenGLWidget->doneCurrent();
+	if (mWebView) {
+		delete mWebView;
+	}
 }
 
 void MxTexture::bind()
@@ -119,11 +121,16 @@ void MxTexture::onFrame()
 	QPainter painter(&image);
 	mWebView->page()->setViewportSize(size);
 	mWebView->page()->mainFrame()->render(&painter);
+
 	mOpenGLWidget->makeCurrent();
+	if (mOpenGLTexture) {
+		delete mOpenGLTexture;
+	}
 	mOpenGLTexture = new QOpenGLTexture(image.mirrored());
 	mOpenGLTexture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
 	mOpenGLTexture->setMagnificationFilter(QOpenGLTexture::Linear);
 	mOpenGLWidget->doneCurrent();
+
 	emit invalidate();
 }
 
