@@ -6,11 +6,11 @@ TEMPLATE = app
 TARGET = maxine
 INCLUDEPATH += .
 
-QT += core widgets multimedia multimediawidgets dbus
+QT += core widgets multimedia multimediawidgets webkitwidgets dbus
 
 QMAKE_CXX = clang++
 QMAKE_CXXFLAGS += -std=c++11
-LIBS += 
+LIBS +=
 
 # Input
 SOURCES += \
@@ -19,19 +19,21 @@ MxMainWindow.cpp \
 MxScene.cpp \
 MxOpenGLWidget.cpp \
 MxPoint.cpp \
-MxVector2D.cpp \
-MxVideoSurface.cpp \
-MxTexture.cpp \
 MxSceneItem.cpp \
 MxSceneIPC.cpp \
+MxTexture.cpp \
+MxVector2D.cpp \
+MxVideoSurface.cpp \
+MxWebView.cpp \
 
 HEADERS += \
 MxMainWindow.hpp \
 MxScene.hpp \
 MxOpenGLWidget.hpp \
 MxPoint.hpp \
-MxVector2D.hpp \
-MxVideoSurface.hpp \
-MxTexture.hpp \
 MxSceneItem.hpp \
 MxSceneIPC.hpp \
+MxTexture.hpp \
+MxVector2D.hpp \
+MxVideoSurface.hpp \
+MxWebView.hpp \

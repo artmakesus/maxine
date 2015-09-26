@@ -1,12 +1,13 @@
 #include <MxTexture.hpp>
 #include <MxVideoSurface.hpp>
+#include <MxWebView.hpp>
 
 #include <QDebug>
 #include <QImage>
-#include <QMediaPlaylist>
 #include <QOpenGLWidget>
 #include <QOpenGLTexture>
 #include <QSharedMemory>
+#include <QWebFrame>
 
 QStringList MxTexture::IMAGE_SUFFIXES =
 		QStringList() << "jpg"
@@ -20,57 +21,45 @@ QStringList MxTexture::VIDEO_SUFFIXES =
 			      << "mpeg"
 			      << "mp4"
 			      << "avi"
+			      << "ogv"
 			      << "mkv";
 
 MxTexture::MxTexture(QOpenGLWidget *widget, const QString &key, int width, int height, QObject *parent) :
 	QObject(parent),
 	mOpenGLWidget(widget),
 	mOpenGLTexture(nullptr),
-	mVideoPlayer(nullptr)
+	mWebView(nullptr)
 {
 	if (!mOpenGLWidget) {
 		fprintf(stderr, "MxTexture: empty OpenGL widget\n");
 		return;
 	}
-
-	mOpenGLWidget->makeCurrent();
 
 	mSharedMemory = new QSharedMemory(key, this);
 	mSharedMemory->create(width * height * 4);
 	mSharedTextureWidth = width;
 	mSharedTextureHeight = height;
-
-	mOpenGLWidget->doneCurrent();
 }
 
 MxTexture::MxTexture(QOpenGLWidget *widget, const QString &filePath, QObject *parent) :
 	QObject(parent),
 	mOpenGLWidget(widget),
-	mOpenGLTexture(nullptr),
-	mVideoPlayer(nullptr)
+	mOpenGLTexture(nullptr)
 {
 	if (!mOpenGLWidget) {
 		fprintf(stderr, "MxTexture: empty OpenGL widget\n");
 		return;
 	}
-
-	mOpenGLWidget->makeCurrent();
 
 	if (isImage(filePath)) {
 		loadImage(filePath);
 	} else if (isVideo(filePath)) {
 		loadVideo(filePath);
 	}
-
-	mOpenGLWidget->doneCurrent();
 }
 
 MxTexture::~MxTexture()
 {
-	if (mVideoPlayer) {
-		delete mVideoPlayer;
-	}
-
 	if (!mOpenGLTexture) {
 		return;
 	}
@@ -116,36 +105,40 @@ bool MxTexture::invalidateSharedTexture()
 	return true;
 }
 
-void MxTexture::loadImage(const QString &filePath)
+void MxTexture::prepareWebView()
 {
-	QImage image(filePath);
-	if (image.isNull()) {
-		fprintf(stderr, "MxTexture: failed to load texture file\n");
-		return;
-	}
+	mWebView = new MxWebView;
+	mWebView->page()->mainFrame()->setScrollBarPolicy(Qt::Vertical, Qt::ScrollBarAlwaysOff);
+	mWebView->page()->mainFrame()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
+}
 
+void MxTexture::onFrame()
+{
+	auto size = mWebView->page()->mainFrame()->contentsSize();
+	QImage image(size, QImage::Format_ARGB32);
+	QPainter painter(&image);
+	mWebView->page()->setViewportSize(size);
+	mWebView->page()->mainFrame()->render(&painter);
+	mOpenGLWidget->makeCurrent();
 	mOpenGLTexture = new QOpenGLTexture(image.mirrored());
 	mOpenGLTexture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
 	mOpenGLTexture->setMagnificationFilter(QOpenGLTexture::Linear);
+	mOpenGLWidget->doneCurrent();
+	emit invalidate();
+}
+
+void MxTexture::loadImage(const QString &filePath)
+{
+	prepareWebView();
+	mWebView->setHtml("<html><head><style>*{margin: 0}</style></head><body><img src='file://" + filePath + "' /></body></html>");
+	connect(mWebView, &MxWebView::onPaint, this, &MxTexture::onFrame);
 }
 
 void MxTexture::loadVideo(const QString &filePath)
 {
-	auto playlist = new QMediaPlaylist;
-	playlist->addMedia(QUrl::fromLocalFile(filePath));
-	playlist->setCurrentIndex(0);
-	playlist->setPlaybackMode(QMediaPlaylist::Loop);
-
-	mVideoPlayer = new QMediaPlayer;
-	mVideoPlayer->setPlaylist(playlist);
-
-	mVideoSurface = new MxVideoSurface;
-	mVideoPlayer->setVideoOutput(mVideoSurface);
-
-	connect(mVideoSurface, &MxVideoSurface::onVideoFrame, this, &MxTexture::onVideoFrame);
-	connect(mVideoPlayer, SIGNAL(error(QMediaPlayer::Error)), this, SLOT(onMediaPlayerError(QMediaPlayer::Error)));
-
-	mVideoPlayer->play();
+	prepareWebView();
+	mWebView->setHtml("<html><head><style>*{margin: 0}</style></head><body><video src='file://" + filePath + "' autoplay loop></video></body></html>");
+	connect(mWebView, &MxWebView::onPaint, this, &MxTexture::onFrame);
 }
 
 bool MxTexture::isImage(const QString &filePath)
@@ -166,40 +159,4 @@ bool MxTexture::isVideo(const QString &filePath)
 		}
 	}
 	return false;
-}
-
-void MxTexture::onVideoFrame(const QVideoFrame &frame)
-{
-	if (!mOpenGLWidget) {
-		return;
-	}
-
-	mOpenGLWidget->makeCurrent();
-	
-	if (mOpenGLTexture && mOpenGLTexture->isCreated()) {
-		// OpenGL Texture is already created
-		QImage image(frame.bits(), frame.width(), frame.height(), QImage::Format_Grayscale8);
-		mOpenGLTexture->setData(image.mirrored());
-	} else {
-		// OpenGL Texture hasn't been created
-		QImage image(frame.bits(), frame.width(), frame.height(), QImage::Format_Grayscale8);
-		mOpenGLTexture = new QOpenGLTexture(image.mirrored());
-		mOpenGLTexture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
-		mOpenGLTexture->setMagnificationFilter(QOpenGLTexture::Linear);
-	}
-
-	mOpenGLWidget->doneCurrent();
-
-	emit invalidate();
-}
-
-void MxTexture::onMediaPlayerError(QMediaPlayer::Error error)
-{
-	if (mVideoPlayer->state() == QMediaPlayer::PlayingState) {
-		mVideoPlayer->stop();
-	}
-
-	delete mOpenGLTexture;
-	// FIXME: deleting mVideoPlayer somehow crashes the program
-	// delete mVideoPlayer;
 }
