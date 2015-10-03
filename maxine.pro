@@ -10,7 +10,7 @@ QT += core widgets multimedia multimediawidgets webkitwidgets network
 
 QMAKE_CXX = g++
 QMAKE_CXXFLAGS += -std=c++11
-LIBS +=
+LIBS += -lrt
 
 # Input
 SOURCES += \

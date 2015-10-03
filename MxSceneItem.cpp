@@ -23,7 +23,7 @@ const int MxSceneItem::FirstPoint = 1;
 
 MxSceneItem::MxSceneItem(QGraphicsItem *parent) :
 	QGraphicsItem(parent),
-	mID(qrand() % 100),
+	mID(qrand()),
 	mTexture(nullptr)
 {
 	init();
@@ -89,6 +89,7 @@ void MxSceneItem::destroySharedTexture()
 void MxSceneItem::invalidateSharedTexture()
 {
 	mTexture->invalidateSharedTexture();
+	emit invalidate();
 }
 
 int MxSceneItem::id() const

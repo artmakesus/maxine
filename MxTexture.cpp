@@ -10,6 +10,10 @@
 #include <QWebFrame>
 #include <QWebElement>
 
+#include <unistd.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+
 QStringList MxTexture::IMAGE_SUFFIXES =
 		QStringList() << "jpg"
 			      << "jpeg"
@@ -32,7 +36,9 @@ MxTexture::MxTexture(QOpenGLWidget *widget, int id, int width, int height, QObje
 	mOpenGLWidget(widget),
 	mOpenGLTexture(nullptr),
 	mWebView(nullptr),
+	mSharedFileDescriptor(-1),
 	mSharedMemory(nullptr)
+	//mSharedMemory(nullptr)
 {
 	createSharedTexture(id, width, height);
 }
@@ -42,7 +48,9 @@ MxTexture::MxTexture(QOpenGLWidget *widget, const QString &filePath, QObject *pa
 	mOpenGLWidget(widget),
 	mOpenGLTexture(nullptr),
 	mWebView(nullptr),
+	mSharedFileDescriptor(-1),
 	mSharedMemory(nullptr)
+	//mSharedMemory(nullptr)
 {
 	if (!mOpenGLWidget) {
 		fprintf(stderr, "MxTexture: empty OpenGL widget\n");
@@ -85,10 +93,21 @@ void MxTexture::release()
 
 void MxTexture::createSharedTexture(int id, int width, int height)
 {
-	char buf[64];
-	sprintf(buf, "%d", id);
-	mSharedMemory = new QSharedMemory(buf, this);
-	mSharedMemory->create(width * height * 4);
+	char str[64];
+	sprintf(str, "%d", id);
+	//mSharedMemory = new QSharedMemory(buf, this);
+	//mSharedMemory->create(width * height * 4);
+	mSharedFileDescriptor = shm_open(str, O_CREAT | O_RDWR, 0600);
+	if (mSharedFileDescriptor == -1) {
+		return;
+	}
+
+	if (fallocate(mSharedFileDescriptor, 0, 0, width * height * 4) != 0) {
+		shm_unlink(str);
+		return;
+	}
+
+	mSharedMemory = (int *) mmap(NULL, width * height * 4, PROT_READ | PROT_WRITE, MAP_SHARED, mSharedFileDescriptor, 0);
 	mSharedTextureWidth = width;
 	mSharedTextureHeight = height;
 }
@@ -97,6 +116,11 @@ void MxTexture::destroySharedTexture()
 {
 	if (mSharedMemory) {
 		delete mSharedMemory;
+		mSharedMemory = nullptr;
+	}
+
+	if (mSharedFileDescriptor >= 0) {
+		close(mSharedFileDescriptor);
 	}
 }
 
@@ -107,16 +131,16 @@ bool MxTexture::invalidateSharedTexture()
 	}
 
 	mOpenGLWidget->makeCurrent();
-	mSharedMemory->lock();
+	//mSharedMemory->lock();
 
-	auto data = static_cast<uchar *>(mSharedMemory->data());
+	auto data = (uchar *) (mSharedMemory);
 	QImage image(data, mSharedTextureWidth, mSharedTextureHeight, QImage::Format_ARGB32);
 	mOpenGLTexture = new QOpenGLTexture(image.mirrored());
 	mOpenGLTexture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
 	mOpenGLTexture->setMagnificationFilter(QOpenGLTexture::Linear);
 	emit invalidate();
 
-	mSharedMemory->unlock();
+	//mSharedMemory->unlock();
 	mOpenGLWidget->doneCurrent();
 
 	return true;
