@@ -27,30 +27,22 @@ QStringList MxTexture::VIDEO_SUFFIXES =
 			      << "mkv"
 			      << "webm";
 
-/*
-MxTexture::MxTexture(QOpenGLWidget *widget, const QString &key, int width, int height, QObject *parent) :
+MxTexture::MxTexture(QOpenGLWidget *widget, int id, int width, int height, QObject *parent) :
 	QObject(parent),
 	mOpenGLWidget(widget),
 	mOpenGLTexture(nullptr),
-	mWebView(nullptr)
+	mWebView(nullptr),
+	mSharedMemory(nullptr)
 {
-	if (!mOpenGLWidget) {
-		fprintf(stderr, "MxTexture: empty OpenGL widget\n");
-		return;
-	}
-
-	mSharedMemory = new QSharedMemory(key, this);
-	mSharedMemory->create(width * height * 4);
-	mSharedTextureWidth = width;
-	mSharedTextureHeight = height;
+	createSharedTexture(id, width, height);
 }
-*/
 
 MxTexture::MxTexture(QOpenGLWidget *widget, const QString &filePath, QObject *parent) :
 	QObject(parent),
 	mOpenGLWidget(widget),
 	mOpenGLTexture(nullptr),
-	mWebView(nullptr)
+	mWebView(nullptr),
+	mSharedMemory(nullptr)
 {
 	if (!mOpenGLWidget) {
 		fprintf(stderr, "MxTexture: empty OpenGL widget\n");

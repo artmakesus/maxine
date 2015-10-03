@@ -79,7 +79,7 @@ void MxScene::createSharedTexture(int id, int width, int height)
 {
 	auto is = items();
 	for (auto i = 0; i < is.size(); i++) {
-		auto item = reinterpret_cast<MxSceneItem *>(is[i]);
+		auto item = static_cast<MxSceneItem *>(is[i]);
 		if (item->id() == id) {
 			item->createSharedTexture(width, height);
 			break;
@@ -91,7 +91,7 @@ void MxScene::destroySharedTexture(int id)
 {
 	auto is = items();
 	for (auto i = 0; i < is.size(); i++) {
-		auto item = reinterpret_cast<MxSceneItem *>(is[i]);
+		auto item = dynamic_cast<MxSceneItem *>(is[i]);
 		if (item->id() == id) {
 			item->destroySharedTexture();
 			break;

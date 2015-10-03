@@ -20,7 +20,7 @@ public:
 	MxTexture(QOpenGLWidget *widget, const QString &filePath, QObject *parent = 0);
 
 	// Constructor for shared texture
-	//MxTexture(QOpenGLWidget *widget, const QString &key, int width, int height, QObject *parent = 0);
+	MxTexture(QOpenGLWidget *widget, int id, int width, int height, QObject *parent = 0);
 
 	~MxTexture();
 

@@ -1,8 +1,8 @@
 #ifndef MX_SCENEITEM_HPP
 #define MX_SCENEITEM_HPP
 
-#include <QAbstractGraphicsShapeItem>
 #include <QBrush>
+#include <QGraphicsItem>
 #include <QGraphicsScene>
 #include <QPen>
 #include <QPolygonF>
@@ -16,7 +16,7 @@ class QOpenGLWidget;
 class QStyleOptionGraphicsItem;
 class QWidget;
 
-class MxSceneItem : public QObject, public QAbstractGraphicsShapeItem {
+class MxSceneItem : public QObject, public QGraphicsItem {
 	Q_OBJECT
 public:
 	MxSceneItem(QGraphicsItem *parent = 0);

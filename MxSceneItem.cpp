@@ -22,7 +22,9 @@ const int MxSceneItem::CenterPoint = 0;
 const int MxSceneItem::FirstPoint = 1;
 
 MxSceneItem::MxSceneItem(QGraphicsItem *parent) :
-	QAbstractGraphicsShapeItem(parent)
+	QGraphicsItem(parent),
+	mID(qrand() % 100),
+	mTexture(nullptr)
 {
 	init();
 }
@@ -36,10 +38,7 @@ MxSceneItem::~MxSceneItem()
 
 void MxSceneItem::init()
 {
-	mID = qrand();
-
 	mSelectedVertex = -1;
-	mTexture = nullptr;
 
 	setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
 	setAcceptDrops(true);
@@ -79,7 +78,7 @@ void MxSceneItem::setTextureCoordinates(const QPolygonF &textureCoordinates)
 
 void MxSceneItem::createSharedTexture(int width, int height)
 {
-	mTexture->createSharedTexture(mID, width, height);
+	mTexture = new MxTexture(openGLWidget(), mID, width, height, this);
 }
 
 void MxSceneItem::destroySharedTexture()
@@ -165,14 +164,14 @@ void MxSceneItem::mousePressEvent(QGraphicsSceneMouseEvent *evt)
 		}
 	}
 
-	QAbstractGraphicsShapeItem::mousePressEvent(evt);
+	QGraphicsItem::mousePressEvent(evt);
 }
 
 void MxSceneItem::mouseMoveEvent(QGraphicsSceneMouseEvent *evt)
 {
 	// No vertex is selected so just let parent handle it
 	if (mSelectedVertex == -1) {
-		QAbstractGraphicsShapeItem::mouseMoveEvent(evt);
+		QGraphicsItem::mouseMoveEvent(evt);
 		return;
 	}
 
@@ -188,14 +187,14 @@ void MxSceneItem::mouseMoveEvent(QGraphicsSceneMouseEvent *evt)
 
 void MxSceneItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *evt)
 {
-	QAbstractGraphicsShapeItem::mouseReleaseEvent(evt);
+	QGraphicsItem::mouseReleaseEvent(evt);
 
 	deselectVertex();
 }
 
 void MxSceneItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *evt)
 {
-	QAbstractGraphicsShapeItem::mouseDoubleClickEvent(evt);
+	QGraphicsItem::mouseDoubleClickEvent(evt);
 
 	auto mousePos = evt->pos();
 
@@ -395,7 +394,12 @@ QOpenGLWidget *MxSceneItem::openGLWidget()
 		return nullptr;
 	}
 
-	auto widget = static_cast<QOpenGLWidget*>(views[0]->viewport());
+	auto viewport = views[0]->viewport();
+	if (!viewport) {
+		return nullptr;
+	}
+
+	auto widget = static_cast<QOpenGLWidget*>(viewport);
 	return widget;
 }
 

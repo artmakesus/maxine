@@ -30,7 +30,7 @@ void MxServer::handleRequest(QTcpSocket *client, const QString &type, const QJso
 		QJsonArray array;
 		auto items = mScene->items();
 		for (auto i = 0; i < items.size(); i++) {
-			auto item = reinterpret_cast<MxSceneItem *>(items[i]);
+			auto item = static_cast<MxSceneItem *>(items[i]);
 			QJsonValue value(item->id());
 			array << value;
 		}
