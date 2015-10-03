@@ -1,7 +1,8 @@
 #include <MxMainWindow.hpp>
-
 #include <MxScene.hpp>
+#include <MxServer.hpp>
 #include <MxOpenGLWidget.hpp>
+
 #include <QMenuBar>
 #include <QGraphicsView>
 #include <QFileDialog>
@@ -14,10 +15,13 @@ MxMainWindow::MxMainWindow(QWidget *parent, Qt::WindowFlags f) :
 	setWindowTitle(tr("Maxine"));
 
 	// Setup Scene
-	mScene = new MxScene;
+	mScene = new MxScene(this);
 	mGraphicsView = new QGraphicsView(mScene);
 	mGraphicsView->setViewport(new MxOpenGLWidget);
 	mGraphicsView->setFrameShape(QFrame::NoFrame);
+
+	// Setup Server
+	mServer = new MxServer(mScene, this);
 
 	// Setup the rest of the window
 	initMenuBar();

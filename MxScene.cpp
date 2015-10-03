@@ -1,6 +1,5 @@
 #include <MxScene.hpp>
 #include <MxSceneItem.hpp>
-#include <MxSceneIPC.hpp>
 
 #include <QGraphicsSceneMouseEvent>
 #include <QDataStream>
@@ -12,8 +11,6 @@ MxScene::MxScene(QObject *parent) :
 	mIsMarkersShown(true)
 {
 	setBackgroundBrush(QBrush(QColor(0, 0, 0)));
-
-	mIPC = new MxSceneIPC(this);
 }
 
 void MxScene::new_()
@@ -72,36 +69,46 @@ bool MxScene::isMarkersShown()
 	return mIsMarkersShown;
 }
 
-bool MxScene::createSharedTexture(const QString &key, int index, int width, int height) const
-{
-	auto list = items();
-
-	// Check if index is valid
-	if (list.size() <= index) {
-		return false;
-	}
-
-	auto item = static_cast<MxSceneItem*>(list[index]);
-	return item->createSharedTexture(key, width, height);
-}
-
-bool MxScene::invalidateSharedTexture(int index) const
-{
-	auto list = items();
-
-	// Check if index is valid
-	if (list.size() <= index) {
-		return false;
-	}
-
-	auto item = static_cast<MxSceneItem*>(list[index]);
-	return item->invalidateSharedTexture();
-}
-
 void MxScene::addShape(MxSceneItem *shape)
 {
 	connect(shape, &MxSceneItem::invalidate,this, &MxScene::invalidate);
 	addItem(shape);
+}
+
+void MxScene::createSharedTexture(int id, int width, int height)
+{
+	auto is = items();
+	for (auto i = 0; i < is.size(); i++) {
+		auto item = reinterpret_cast<MxSceneItem *>(is[i]);
+		if (item->id() == id) {
+			item->createSharedTexture(width, height);
+			break;
+		}
+	}
+}
+
+void MxScene::destroySharedTexture(int id)
+{
+	auto is = items();
+	for (auto i = 0; i < is.size(); i++) {
+		auto item = reinterpret_cast<MxSceneItem *>(is[i]);
+		if (item->id() == id) {
+			item->destroySharedTexture();
+			break;
+		}
+	}
+}
+
+void MxScene::invalidateSharedTexture(int id)
+{
+	auto is = items();
+	for (auto i = 0; i < is.size(); i++) {
+		auto item = reinterpret_cast<MxSceneItem *>(is[i]);
+		if (item->id() == id) {
+			item->invalidateSharedTexture();
+			break;
+		}
+	}
 }
 
 void MxScene::addEmptyShape()

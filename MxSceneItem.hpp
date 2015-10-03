@@ -1,15 +1,16 @@
 #ifndef MX_SCENEITEM_HPP
 #define MX_SCENEITEM_HPP
 
-#include <QGraphicsScene>
 #include <QAbstractGraphicsShapeItem>
-#include <QPolygonF>
 #include <QBrush>
+#include <QGraphicsScene>
 #include <QPen>
+#include <QPolygonF>
 
 class MxTexture;
 
 class QGraphicsItem;
+class QJsonArray;
 class QPainter;
 class QOpenGLWidget;
 class QStyleOptionGraphicsItem;
@@ -35,12 +36,16 @@ public:
 	// Set texture coordinates
 	void setTextureCoordinates(const QPolygonF &textureCoordinates);
 
-	// Creates shared texture for image manipulations by other programs through DBus
-	bool createSharedTexture(const QString &key, int width, int height);
+	// Create Shared Texture
+	void createSharedTexture(int width, int height);
 
-	// Invalidates the shared texture
-	bool invalidateSharedTexture();
+	// Destroy Shared Texture
+	void destroySharedTexture();
 
+	// Invalidate Shared Texture
+	void invalidateSharedTexture();
+
+	int id() const;
 	QPolygonF vertices() const;
 	QPolygonF textureCoordinates() const;
 	QString textureFilePath() const;
@@ -67,6 +72,7 @@ private:
 	static const int CenterPoint;
 	static const int FirstPoint;
 
+	int	   mID;
 	QPolygonF  mVertices;
 	QPolygonF  mTextureCoordinates;
 	QString    mTextureFilePath;

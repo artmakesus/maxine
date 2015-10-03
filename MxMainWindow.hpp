@@ -4,6 +4,8 @@
 #include <QMainWindow>
 
 class MxScene;
+class MxServer;
+
 class QGraphicsView;
 class QShortcut;
 
@@ -12,6 +14,7 @@ public:
 	MxMainWindow(QWidget *parent = 0, Qt::WindowFlags f = 0);
 
 private:
+	MxServer *mServer;
 	MxScene *mScene;
 	QGraphicsView *mGraphicsView;
 

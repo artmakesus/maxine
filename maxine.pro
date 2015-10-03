@@ -6,7 +6,7 @@ TEMPLATE = app
 TARGET = maxine
 INCLUDEPATH += .
 
-QT += core widgets multimedia multimediawidgets webkitwidgets dbus
+QT += core widgets multimedia multimediawidgets webkitwidgets network
 
 QMAKE_CXX = g++
 QMAKE_CXXFLAGS += -std=c++11
@@ -20,7 +20,7 @@ MxScene.cpp \
 MxOpenGLWidget.cpp \
 MxPoint.cpp \
 MxSceneItem.cpp \
-MxSceneIPC.cpp \
+MxServer.cpp \
 MxTexture.cpp \
 MxVector2D.cpp \
 MxVideoSurface.cpp \
@@ -32,7 +32,7 @@ MxScene.hpp \
 MxOpenGLWidget.hpp \
 MxPoint.hpp \
 MxSceneItem.hpp \
-MxSceneIPC.hpp \
+MxServer.hpp \
 MxTexture.hpp \
 MxVector2D.hpp \
 MxVideoSurface.hpp \

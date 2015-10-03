@@ -15,7 +15,8 @@ QStringList MxTexture::IMAGE_SUFFIXES =
 			      << "jpeg"
 			      << "png"
 			      << "tga"
-			      << "bmp";
+			      << "bmp"
+			      << "webp";
 
 QStringList MxTexture::VIDEO_SUFFIXES =
 		QStringList() << "mpg"
@@ -23,8 +24,10 @@ QStringList MxTexture::VIDEO_SUFFIXES =
 			      << "mp4"
 			      << "avi"
 			      << "ogv"
-			      << "mkv";
+			      << "mkv"
+			      << "webm";
 
+/*
 MxTexture::MxTexture(QOpenGLWidget *widget, const QString &key, int width, int height, QObject *parent) :
 	QObject(parent),
 	mOpenGLWidget(widget),
@@ -41,6 +44,7 @@ MxTexture::MxTexture(QOpenGLWidget *widget, const QString &key, int width, int h
 	mSharedTextureWidth = width;
 	mSharedTextureHeight = height;
 }
+*/
 
 MxTexture::MxTexture(QOpenGLWidget *widget, const QString &filePath, QObject *parent) :
 	QObject(parent),
@@ -87,6 +91,23 @@ void MxTexture::release()
 	}
 }
 
+void MxTexture::createSharedTexture(int id, int width, int height)
+{
+	char buf[64];
+	sprintf(buf, "%d", id);
+	mSharedMemory = new QSharedMemory(buf, this);
+	mSharedMemory->create(width * height * 4);
+	mSharedTextureWidth = width;
+	mSharedTextureHeight = height;
+}
+
+void MxTexture::destroySharedTexture()
+{
+	if (mSharedMemory) {
+		delete mSharedMemory;
+	}
+}
+
 bool MxTexture::invalidateSharedTexture()
 {
 	if (!mSharedMemory) {
@@ -116,7 +137,7 @@ void MxTexture::prepareWebView()
 	mWebView->page()->mainFrame()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
 }
 
-void MxTexture::onFrame()
+void MxTexture::onWebViewFrame()
 {
 	auto page = mWebView->page();
 	auto elem = page->mainFrame()->findFirstElement("video, img");
@@ -146,14 +167,14 @@ void MxTexture::loadImage(const QString &filePath)
 {
 	prepareWebView();
 	mWebView->setHtml("<html><body><img src='file://" + filePath + "' /></body></html>");
-	connect(mWebView, &MxWebView::onPaint, this, &MxTexture::onFrame);
+	connect(mWebView, &MxWebView::onPaint, this, &MxTexture::onWebViewFrame);
 }
 
 void MxTexture::loadVideo(const QString &filePath)
 {
 	prepareWebView();
 	mWebView->setHtml("<html><body><video src='file://" + filePath + "' autoplay loop></video></body></html>");
-	connect(mWebView, &MxWebView::onPaint, this, &MxTexture::onFrame);
+	connect(mWebView, &MxWebView::onPaint, this, &MxTexture::onWebViewFrame);
 }
 
 bool MxTexture::isImage(const QString &filePath)

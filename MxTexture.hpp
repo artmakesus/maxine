@@ -20,7 +20,7 @@ public:
 	MxTexture(QOpenGLWidget *widget, const QString &filePath, QObject *parent = 0);
 
 	// Constructor for shared texture
-	MxTexture(QOpenGLWidget *widget, const QString &key, int width, int height, QObject *parent = 0);
+	//MxTexture(QOpenGLWidget *widget, const QString &key, int width, int height, QObject *parent = 0);
 
 	~MxTexture();
 
@@ -29,6 +29,12 @@ public:
 
 	// Release this texture from the current texture used by OpenGL
 	void release();
+
+	// Activate Shared Texture
+	void createSharedTexture(int id, int width, int height);
+
+	// Deactivate Shared Texture
+	void destroySharedTexture();
 
 	// Invalidates the shared texture
 	bool invalidateSharedTexture();
@@ -69,7 +75,7 @@ private:
 	bool isVideo(const QString &filePath);
 
 private slots:
-	void onFrame();
+	void onWebViewFrame();
 };
 
 #endif

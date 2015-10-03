@@ -2,11 +2,14 @@
 #include <MxSceneItem.hpp>
 #include <MxTexture.hpp>
 #include <MxPoint.hpp>
-#include <QPainter>
-#include <QOpenGLWidget>
+
 #include <QGraphicsView>
 #include <QGraphicsSceneDragDropEvent>
+#include <QJsonArray>
+#include <QJsonObject>
 #include <QMimeData>
+#include <QOpenGLWidget>
+#include <QPainter>
 #include <QUrl>
 #include <QtMath>
 
@@ -33,6 +36,8 @@ MxSceneItem::~MxSceneItem()
 
 void MxSceneItem::init()
 {
+	mID = qrand();
+
 	mSelectedVertex = -1;
 	mTexture = nullptr;
 
@@ -72,6 +77,26 @@ void MxSceneItem::setTextureCoordinates(const QPolygonF &textureCoordinates)
 	mTextureCoordinates = textureCoordinates;
 }
 
+void MxSceneItem::createSharedTexture(int width, int height)
+{
+	mTexture->createSharedTexture(mID, width, height);
+}
+
+void MxSceneItem::destroySharedTexture()
+{
+	mTexture->destroySharedTexture();
+}
+
+void MxSceneItem::invalidateSharedTexture()
+{
+	mTexture->invalidateSharedTexture();
+}
+
+int MxSceneItem::id() const
+{
+	return mID;
+}
+
 QPolygonF MxSceneItem::vertices() const
 {
 	return mVertices;
@@ -85,25 +110,6 @@ QPolygonF MxSceneItem::textureCoordinates() const
 QString MxSceneItem::textureFilePath() const
 {
 	return mTextureFilePath;
-}
-
-bool MxSceneItem::createSharedTexture(const QString &key, int width, int height)
-{
-	if (mTexture) {
-		delete mTexture;
-	}
-	mTexture = new MxTexture(openGLWidget(), key, width, height, this);
-	return true;
-}
-
-bool MxSceneItem::invalidateSharedTexture()
-{
-	if (mTexture) {
-		auto b = mTexture->invalidateSharedTexture();
-		emit invalidate();
-		return b;
-	}
-	return false;
 }
 
 QRectF MxSceneItem::boundingRect() const
