@@ -38,7 +38,6 @@ MxTexture::MxTexture(QOpenGLWidget *widget, int id, int width, int height, QObje
 	mWebView(nullptr),
 	mSharedFileDescriptor(-1),
 	mSharedMemory(nullptr)
-	//mSharedMemory(nullptr)
 {
 	createSharedTexture(id, width, height);
 }
@@ -50,7 +49,6 @@ MxTexture::MxTexture(QOpenGLWidget *widget, const QString &filePath, QObject *pa
 	mWebView(nullptr),
 	mSharedFileDescriptor(-1),
 	mSharedMemory(nullptr)
-	//mSharedMemory(nullptr)
 {
 	if (!mOpenGLWidget) {
 		fprintf(stderr, "MxTexture: empty OpenGL widget\n");
@@ -95,8 +93,6 @@ void MxTexture::createSharedTexture(int id, int width, int height)
 {
 	char str[64];
 	sprintf(str, "%d", id);
-	//mSharedMemory = new QSharedMemory(buf, this);
-	//mSharedMemory->create(width * height * 4);
 	mSharedFileDescriptor = shm_open(str, O_CREAT | O_RDWR, 0600);
 	if (mSharedFileDescriptor == -1) {
 		return;
@@ -130,22 +126,24 @@ bool MxTexture::invalidateSharedTexture()
 		return false;
 	}
 
-	mOpenGLWidget->makeCurrent();
-	//mSharedMemory->lock();
-
-	if (mOpenGLTexture) {
-		delete mOpenGLTexture;
-	}
-
 	auto data = (uchar *) (mSharedMemory);
 	QImage image(data, mSharedTextureWidth, mSharedTextureHeight, QImage::Format_ARGB32);
-	mOpenGLTexture = new QOpenGLTexture(image.mirrored());
-	mOpenGLTexture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
-	mOpenGLTexture->setMagnificationFilter(QOpenGLTexture::Linear);
-	emit invalidate();
 
-	//mSharedMemory->unlock();
+	mOpenGLWidget->makeCurrent();
+
+	if (mOpenGLTexture) {
+		mOpenGLTexture->destroy();
+		mOpenGLTexture->create();
+		mOpenGLTexture->setData(image.mirrored());
+	} else {
+		mOpenGLTexture = new QOpenGLTexture(image.mirrored());
+		mOpenGLTexture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
+		mOpenGLTexture->setMagnificationFilter(QOpenGLTexture::Linear);
+	}
+
 	mOpenGLWidget->doneCurrent();
+
+	emit invalidate();
 
 	return true;
 }
@@ -173,11 +171,14 @@ void MxTexture::onWebViewFrame()
 
 	mOpenGLWidget->makeCurrent();
 	if (mOpenGLTexture) {
-		delete mOpenGLTexture;
+		mOpenGLTexture->destroy();
+		mOpenGLTexture->create();
+		mOpenGLTexture->setData(image.mirrored());
+	} else {
+		mOpenGLTexture = new QOpenGLTexture(image.mirrored());
+		mOpenGLTexture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
+		mOpenGLTexture->setMagnificationFilter(QOpenGLTexture::Linear);
 	}
-	mOpenGLTexture = new QOpenGLTexture(image.mirrored());
-	mOpenGLTexture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
-	mOpenGLTexture->setMagnificationFilter(QOpenGLTexture::Linear);
 	mOpenGLWidget->doneCurrent();
 
 	emit invalidate();
