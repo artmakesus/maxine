@@ -133,6 +133,10 @@ bool MxTexture::invalidateSharedTexture()
 	mOpenGLWidget->makeCurrent();
 	//mSharedMemory->lock();
 
+	if (mOpenGLTexture) {
+		delete mOpenGLTexture;
+	}
+
 	auto data = (uchar *) (mSharedMemory);
 	QImage image(data, mSharedTextureWidth, mSharedTextureHeight, QImage::Format_ARGB32);
 	mOpenGLTexture = new QOpenGLTexture(image.mirrored());
