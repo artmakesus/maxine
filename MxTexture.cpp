@@ -102,7 +102,7 @@ void MxTexture::createSharedTexture(int id, int width, int height)
 		return;
 	}
 
-	if (fallocate(mSharedFileDescriptor, 0, 0, width * height * 4) != 0) {
+	if (posix_fallocate(mSharedFileDescriptor, 0, width * height * 4) != 0) {
 		shm_unlink(str);
 		return;
 	}
